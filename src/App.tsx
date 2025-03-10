@@ -19,6 +19,7 @@ function App() {
               />
             }
           />
+
           <Route path="/carousel" element={<CarouselWrapper />} />
         </Route>
       </Routes>

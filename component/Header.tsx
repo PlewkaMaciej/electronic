@@ -9,7 +9,7 @@ import {
   Menu,
   X,
 } from "lucide-react";
-
+import React from "react";
 function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [active, setActive] = useState("");
