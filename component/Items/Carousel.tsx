@@ -23,39 +23,44 @@ const Carousel: React.FC<CarouselProps> = ({ title, items }) => {
   };
 
   return (
-    <div className="w-full bg-[#F0F1EC] py-6 px-10 relative border border-gray-300 rounded-xl shadow-lg">
+    <div className="w-full bg-[#F0F1EC] py-6 px-4 sm:px-10 relative border border-gray-300 rounded-xl shadow-lg overflow-hidden">
       <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">
         {title}
       </h2>
 
-      <button
-        onClick={() => scroll(-340)}
-        className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-gray-200 hover:bg-gray-300 rounded-full p-2 shadow-lg z-10"
-      >
-        <ChevronLeft />
-      </button>
+      <div className="relative flex items-center">
+        {/* Left Arrow - Hidden on small screens */}
+        <button
+          onClick={() => scroll(-340)}
+          className="hidden sm:flex absolute left-2 top-1/2 transform -translate-y-1/2 bg-gray-200 hover:bg-gray-300 rounded-full p-2 shadow-lg z-10"
+        >
+          <ChevronLeft />
+        </button>
 
-      <div
-        ref={scrollRef}
-        className="flex overflow-x-auto gap-10 px-16 scroll-smooth"
-      >
-        {items.map((item, index) => (
-          <div key={index} style={{ minWidth: "260px" }}>
-            <Announcement
-              name={item.name}
-              specification={item.specification}
-              imageSrc={item.imageSrc}
-            />
-          </div>
-        ))}
+        <div
+          ref={scrollRef}
+          className="flex overflow-x-auto gap-6 px-4 sm:px-16 scroll-smooth scrollbar-hide whitespace-nowrap"
+          style={{ scrollSnapType: "x mandatory" }}
+        >
+          {items.map((item, index) => (
+            <div key={index} className="flex-shrink-0 w-[90%] sm:w-[260px]">
+              <Announcement
+                name={item.name}
+                specification={item.specification}
+                imageSrc={item.imageSrc}
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Right Arrow - Hidden on small screens */}
+        <button
+          onClick={() => scroll(340)}
+          className="hidden sm:flex absolute right-2 top-1/2 transform -translate-y-1/2 bg-gray-200 hover:bg-gray-300 rounded-full p-2 shadow-lg z-10"
+        >
+          <ChevronRight />
+        </button>
       </div>
-
-      <button
-        onClick={() => scroll(340)}
-        className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gray-200 hover:bg-gray-300 rounded-full p-2 shadow-lg z-10"
-      >
-        <ChevronRight />
-      </button>
     </div>
   );
 };
