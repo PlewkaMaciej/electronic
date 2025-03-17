@@ -3,7 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import Layout from "./Layout";
 import CarouselWrapper from "./Example";
 import RectangleAd from "../component/Items/RectangleAd";
-import Homepage from "./homepage";
+import Homepage from "./Homepage";
 function App() {
   return (
     <>
@@ -23,7 +23,6 @@ function App() {
               />
             }
           />{" "}
-          {/* Poprawiona ścieżka */}
         </Route>
       </Routes>
     </>
