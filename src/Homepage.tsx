@@ -1,7 +1,7 @@
 import React from "react";
 import Carousel from "../component/Items/Carousel";
 
-const CarouselWrapper: React.FC = () => {
+const Homepage: React.FC = () => {
   const trustedSellers = Array.from({ length: 10 }, (_, index) => ({
     name: `Sprzedawca ${index + 1}`,
     specification: `Specyfikacja produktu ${index + 1}`,
@@ -31,4 +31,4 @@ const CarouselWrapper: React.FC = () => {
   );
 };
 
-export default CarouselWrapper;
+export default Homepage;

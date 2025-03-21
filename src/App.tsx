@@ -1,25 +1,15 @@
 import "./App.css";
 import { Routes, Route } from "react-router-dom";
 import Layout from "./Layout";
-import Announcement from "../component/Items/Announcement";
 import CarouselWrapper from "./Example";
-import RectangleAd from "../component/Items/RectangleAd"
+import RectangleAd from "../component/Items/RectangleAd";
+import Homepage from "./Homepage";
 function App() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route
-            path="/ann"
-            element={
-              <Announcement
-                name="przykladowe ogloszenie"
-                specification="Komputery stacjonarne, Telefony, Sprzęt audio"
-                imageSrc="https://www.fotopolis.pl/i/images/9/5/5/dz01MTg0Jmg9Mzg4OA==_src_181955-PA160002.JPG"
-              />
-            }
-          />
-
+        <Route element={<Layout />}>
+          <Route path="/" element={<Homepage />} />
           <Route path="/carousel" element={<CarouselWrapper />} />
           <Route
             path="/rectanglead"
@@ -32,7 +22,7 @@ function App() {
                 price="3500"
               />
             }
-          /> {/* Poprawiona ścieżka */}
+          />{" "}
         </Route>
       </Routes>
     </>
