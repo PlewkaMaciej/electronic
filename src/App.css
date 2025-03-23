@@ -1,1 +1,71 @@
 @import "tailwindcss";
+@keyframes funkyAppear {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) rotate(-180deg);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.1) rotate(20deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes funkyDisappear {
+  0% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.7) rotate(-90deg);
+  }
+}
+
+.funky-enter {
+  animation: funkyAppear 0.5s ease-out forwards;
+}
+
+.funky-exit {
+  animation: funkyDisappear 0.4s ease-in forwards;
+}
+@keyframes slideDown {
+  0% {
+    opacity: 0;
+    transform: scaleY(0.9);
+    max-height: 0;
+  }
+  100% {
+    opacity: 1;
+    transform: scaleY(1);
+    max-height: 500px;
+  }
+}
+
+@keyframes slideUp {
+  0% {
+    opacity: 1;
+    transform: scaleY(1);
+    max-height: 500px;
+  }
+  100% {
+    opacity: 0;
+    transform: scaleY(0.9);
+    max-height: 0;
+  }
+}
+
+.menu-open {
+  animation: slideDown 0.4s ease-out forwards;
+  transform-origin: top;
+  overflow: hidden;
+}
+
+.menu-close {
+  animation: slideUp 0.3s ease-in forwards;
+  transform-origin: top;
+  overflow: hidden;
+}
