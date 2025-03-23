@@ -4,6 +4,7 @@ import Layout from "./Layout";
 import CarouselWrapper from "./Example";
 import RectangleAd from "../component/Items/RectangleAd";
 import Homepage from "./Homepage";
+import ProfileSettigsMain from "./ProfilSettingsMain";
 function App() {
   return (
     <>
@@ -24,6 +25,8 @@ function App() {
             }
           />{" "}
         </Route>
+        <Route path="/Profile" element={<ProfileSettigsMain />} />
+
       </Routes>
     </>
   );
