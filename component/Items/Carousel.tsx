@@ -25,22 +25,24 @@ const Carousel: React.FC<CarouselProps> = ({ title, items, variant }) => {
   };
 
   return (
-    <div className="w-full bg-[#F0F1EC] py-6 px-4 sm:px-10 relative border border-gray-300 rounded-xl shadow-lg overflow-hidden">
+    <div className="w-full bg-[#F0F1EC] py-6 px-2 sm:px-4 relative border border-gray-300 rounded-xl shadow-lg overflow-hidden">
       <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">
         {title}
       </h2>
 
-      <div className="relative flex items-center">
+      <div className="relative flex items-center justify-between px-0 sm:px-2">
+        {/* Lewa strzałka */}
         <button
           onClick={() => scroll(-340)}
-          className="hidden sm:flex absolute left-2 top-1/2 transform -translate-y-1/2 bg-[#339FB8] hover:bg-opacity-90 text-white rounded-full p-2 shadow-lg z-10 cursor-pointer"
+          className="hidden sm:flex bg-[#339FB8] hover:bg-opacity-90 text-white rounded-full p-2 shadow-lg z-10 cursor-pointer mx-2 sm:mx-4"
         >
           <ChevronLeft />
         </button>
 
+        {/* Kontener przewijania */}
         <div
           ref={scrollRef}
-          className="flex overflow-x-auto gap-6 px-4 sm:px-16 scroll-smooth scrollbar-hide whitespace-nowrap cursor-grab"
+          className="flex overflow-x-auto gap-6 px-0 sm:px-2 scroll-smooth scrollbar-hide whitespace-nowrap cursor-grab w-full"
           style={{ scrollSnapType: "x mandatory", scrollbarWidth: "none" }}
         >
           {items.map((item, index) => (
@@ -74,9 +76,10 @@ const Carousel: React.FC<CarouselProps> = ({ title, items, variant }) => {
           ))}
         </div>
 
+        {/* Prawa strzałka */}
         <button
           onClick={() => scroll(340)}
-          className="hidden sm:flex absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#339FB8] hover:bg-opacity-90 text-white rounded-full p-2 shadow-lg z-10 cursor-pointer"
+          className="hidden sm:flex bg-[#339FB8] hover:bg-opacity-90 text-white rounded-full p-2 shadow-lg z-10 cursor-pointer mx-2 sm:mx-4"
         >
           <ChevronRight />
         </button>

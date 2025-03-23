@@ -1,5 +1,6 @@
 import React from "react";
-
+import { Mail } from "lucide-react";
+import StyleInput from "./Items/StyleInput"
 function Footer() {
   return (
     <footer className="bg-[#F0F1EC] py-8 shadow-xl mt-10 border-t border-gray-300">
