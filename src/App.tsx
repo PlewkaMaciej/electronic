@@ -4,7 +4,7 @@ import Layout from "./Layout";
 import CarouselWrapper from "./Example";
 import RectangleAd from "../component/Items/RectangleAd";
 import Homepage from "./Homepage";
-
+import ProfileSettingsMain from "./ProfilSettingsMain";
 import LoginPage from "./LoginPage";
 import RegisterPage from "./RegisterPage";
 function App() {
@@ -29,7 +29,7 @@ function App() {
             }
           />{" "}
         </Route>
-
+        <Route path="/Profile" element={<ProfileSettingsMain />} />
       </Routes>
     </>
   );
