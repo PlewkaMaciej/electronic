@@ -4,7 +4,9 @@ import Layout from "./Layout";
 import CarouselWrapper from "./Example";
 import RectangleAd from "../component/Items/RectangleAd";
 import Homepage from "./Homepage";
-import ProfileSettigsMain from "./ProfilSettingsMain";
+
+import LoginPage from "./LoginPage";
+import RegisterPage from "./RegisterPage";
 function App() {
   return (
     <>
@@ -12,6 +14,8 @@ function App() {
         <Route element={<Layout />}>
           <Route path="/" element={<Homepage />} />
           <Route path="/carousel" element={<CarouselWrapper />} />
+          <Route path="/login-email" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
           <Route
             path="/rectanglead"
             element={
@@ -25,7 +29,6 @@ function App() {
             }
           />{" "}
         </Route>
-        <Route path="/Profile" element={<ProfileSettigsMain />} />
 
       </Routes>
     </>
