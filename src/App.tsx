@@ -13,7 +13,7 @@ function App() {
     <>
       <Routes>
         <Route element={<Layout />}>
-          <Route path="/Product" element={<ProductPage />} />
+          <Route path="/Product/:id" element={<ProductPage />} />
           <Route path="/" element={<Homepage />} />
           <Route path="/carousel" element={<CarouselWrapper />} />
           <Route path="/login-email" element={<LoginPage />} />
