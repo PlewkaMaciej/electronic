@@ -1,5 +1,6 @@
 import React, { useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useNavigate } from "react-router-dom"; // Importujemy hook do nawigacji
 
 interface CarouselItem {
   name: string;
@@ -7,6 +8,7 @@ interface CarouselItem {
   imageSrc: string;
   price?: string;
   date?: string;
+  id: number;
 }
 
 interface CarouselProps {
@@ -17,10 +19,17 @@ interface CarouselProps {
 
 const Carousel: React.FC<CarouselProps> = ({ title, items, variant }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate(); // Hook do nawigacji
 
   const scroll = (scrollOffset: number) => {
     if (scrollRef.current) {
       scrollRef.current.scrollBy({ left: scrollOffset, behavior: "smooth" });
+    }
+  };
+
+  const handleClick = (id: number) => {
+    if (variant === "highlighted") {
+      navigate(`/Product/${id}`);
     }
   };
 
@@ -31,7 +40,6 @@ const Carousel: React.FC<CarouselProps> = ({ title, items, variant }) => {
       </h2>
 
       <div className="relative flex items-center justify-between px-0 sm:px-2">
-        {/* Lewa strzałka */}
         <button
           onClick={() => scroll(-340)}
           className="hidden sm:flex bg-[#339FB8] hover:bg-opacity-90 text-white rounded-full p-2 shadow-lg z-10 cursor-pointer mx-2 sm:mx-4"
@@ -39,7 +47,6 @@ const Carousel: React.FC<CarouselProps> = ({ title, items, variant }) => {
           <ChevronLeft />
         </button>
 
-        {/* Kontener przewijania */}
         <div
           ref={scrollRef}
           className="flex overflow-x-auto gap-6 px-0 sm:px-2 scroll-smooth scrollbar-hide whitespace-nowrap cursor-grab w-full"
@@ -49,6 +56,7 @@ const Carousel: React.FC<CarouselProps> = ({ title, items, variant }) => {
             <div
               key={index}
               className="flex-shrink-0 w-[90%] sm:w-[260px] bg-white p-4 rounded-lg shadow-md"
+              onClick={() => handleClick(item.id)}
             >
               <img
                 src={item.imageSrc}
@@ -76,7 +84,6 @@ const Carousel: React.FC<CarouselProps> = ({ title, items, variant }) => {
           ))}
         </div>
 
-        {/* Prawa strzałka */}
         <button
           onClick={() => scroll(340)}
           className="hidden sm:flex bg-[#339FB8] hover:bg-opacity-90 text-white rounded-full p-2 shadow-lg z-10 cursor-pointer mx-2 sm:mx-4"

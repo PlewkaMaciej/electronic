@@ -6,6 +6,7 @@ const Homepage: React.FC = () => {
     name: `Sprzedawca ${index + 1}`,
     specification: `Specyfikacja produktu ${index + 1}`,
     imageSrc: `https://picsum.photos/200/300?random=${index + 10}`,
+    id: index,
   }));
 
   const highlightedAds = Array.from({ length: 10 }, (_, index) => ({
@@ -13,6 +14,7 @@ const Homepage: React.FC = () => {
     imageSrc: `https://picsum.photos/200/300?random=${index + 20}`,
     price: `${(Math.random() * 1000 + 100).toFixed(2)} PLN`,
     date: new Date().toLocaleDateString(),
+    id: index,
   }));
 
   return (

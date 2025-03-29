@@ -23,13 +23,13 @@ function App() {
             element={
               <RectangleAd
                 imageSrc="https://www.example.com/ad-image.jpg"
-                name="Przykładowa nazwa ogłoszenia Przykładowa nazwa ogłoszenia Przykładowa1"
+                name="Przykładowa nazwa ogłoszenia"
                 dateAdded="2025-03-09"
                 specification="Intel i7, 16GB RAM, 1TB SSD"
                 price="3500"
               />
             }
-          />{" "}
+          />
         </Route>
         <Route path="/Profile" element={<ProfileSettingsMain />} />
       </Routes>
