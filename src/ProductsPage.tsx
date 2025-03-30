@@ -67,17 +67,17 @@ const ProductPage: React.FC = () => {
 
       {/* Ogłoszenie */}
       <div className="flex flex-col lg:flex-row gap-6 border border-gray-200 p-6 rounded-2xl shadow-xl bg-white">
-        {/* Zdjęcia + opis + info (mobilka) */}
-        <div className="relative flex flex-col items-center bg-white rounded-lg p-4 max-w-md mx-auto lg:max-w-full lg:w-1/2">
-          {/* Główne zdjęcie */}
-          <img
-            src={product.images[currentImage]}
-            alt={product.name}
-            className="w-full h-[300px] md:h-[400px] object-cover rounded-xl shadow-md cursor-pointer"
-            onClick={() => setIsPreviewOpen(true)}
-          />
+        {/* Lewa kolumna - 70% */}
+        <div className="relative flex flex-col items-center bg-white rounded-lg p-4 max-w-md mx-auto lg:max-w-full lg:w-[70%]">
+          <div className="bg-gray-50 p-4 rounded-lg shadow-sm mb-6">
+            <img
+              src={product.images[currentImage]}
+              alt={product.name}
+              className="w-full h-[100px] md:h-[600px] object-fit-cover rounded-xl shadow-md cursor-pointer"
+              onClick={() => setIsPreviewOpen(true)}
+            />
+          </div>
 
-          {/* Miniatury */}
           <div className="relative w-full mt-4">
             <div className="flex items-center justify-center gap-4 w-full flex-wrap">
               <button
@@ -112,19 +112,19 @@ const ProductPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Opis */}
-          <div className="mt-6 w-full">
+          {/* OPIS PRODUKTU SECTION */}
+          <div className="mt-6 w-full bg-gray-50 p-4 rounded-lg shadow-sm flex-1">
             <h2 className="text-lg font-semibold text-gray-800 mb-2">
-              Opis produktu
+              <b>OPIS PRODUKTU</b>
             </h2>
             <p className="text-sm text-gray-700">{product.description}</p>
           </div>
 
-          {/* Info/sprzedawca/specyfikacja/lokalizacja – tylko mobilka */}
+          {/* SPECYFIKACJA SECTION */}
           <div className="block lg:hidden space-y-6 mt-6 w-full">
             <div className="p-4 rounded-lg bg-gray-50 shadow-sm">
               <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                Informacje o sprzedającym
+                <b>INFORMACJE O SPRZEDAJĄCYM</b>
               </h3>
               <p className="text-sm text-gray-700">
                 Nazwa: {product.sellerName}
@@ -139,18 +139,20 @@ const ProductPage: React.FC = () => {
 
             <div className="p-4 rounded-lg bg-gray-50 shadow-sm">
               <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                Specyfikacja
+                <b>SPECYFIKACJA</b>
               </h3>
               <ul className="list-disc pl-5 text-sm text-gray-700">
                 {product.specifications.map((spec, index) => (
-                  <li key={index}>{spec}</li>
+                  <li key={index} className="font-bold">
+                    {spec}
+                  </li>
                 ))}
               </ul>
             </div>
 
             <div className="p-4 rounded-lg bg-gray-50 shadow-sm">
               <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                Lokalizacja
+                <b>LOKALIZACJA</b>
               </h3>
               <div className="w-full h-60 bg-gray-200 rounded-lg flex items-center justify-center text-gray-600 text-sm">
                 Mapka z lokalizacją (tu można podpiąć API)
@@ -159,16 +161,18 @@ const ProductPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Szczegóły produktu na desktopie */}
-        <div className="flex-1 space-y-6 hidden lg:block">
-          <div>
+        {/* Prawa kolumna - 30% */}
+        <div className="hidden lg:block lg:w-[30%] space-y-6">
+          <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
             <h1 className="text-2xl font-bold text-gray-800 mb-2">
               {product.name}
             </h1>
             <p className="text-xl font-semibold text-green-600 mb-4">
               {product.price}
             </p>
-            <div className="space-x-4">
+
+            {/* PRZYCISKI Z POPRAWKĄ */}
+            <div className="flex flex-col gap-3 mt-4">
               <button className="bg-[#339FB8] text-white px-6 py-2 rounded-md shadow hover:bg-[#2b8fa6]">
                 Kup teraz
               </button>
@@ -181,10 +185,9 @@ const ProductPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Info o sprzedającym */}
           <div className="p-4 rounded-lg bg-gray-50 shadow-sm">
             <h3 className="text-lg font-semibold text-gray-800 mb-2">
-              Informacje o sprzedającym
+              <b>INFORMACJE O SPRZEDAJĄCYM</b>
             </h3>
             <p className="text-sm text-gray-700">Nazwa: {product.sellerName}</p>
             <p className="text-sm text-gray-700">
@@ -195,22 +198,22 @@ const ProductPage: React.FC = () => {
             </p>
           </div>
 
-          {/* Specyfikacja */}
           <div className="p-4 rounded-lg bg-gray-50 shadow-sm">
             <h3 className="text-lg font-semibold text-gray-800 mb-2">
-              Specyfikacja
+              <b>SPECYFIKACJA</b>
             </h3>
             <ul className="list-disc pl-5 text-sm text-gray-700">
               {product.specifications.map((spec, index) => (
-                <li key={index}>{spec}</li>
+                <li key={index} className="font-bold">
+                  {spec}
+                </li>
               ))}
             </ul>
           </div>
 
-          {/* Lokalizacja */}
           <div className="p-4 rounded-lg bg-gray-50 shadow-sm">
             <h3 className="text-lg font-semibold text-gray-800 mb-2">
-              Lokalizacja
+              <b>LOKALIZACJA</b>
             </h3>
             <div className="w-full h-60 bg-gray-200 rounded-lg flex items-center justify-center text-gray-600 text-sm">
               Mapka z lokalizacją (tu można podpiąć API)
