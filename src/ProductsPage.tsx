@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useSwipeable } from "react-swipeable"; // Importujemy hook do swipe'a
 
 const product = {
   id: 218636377,
@@ -30,18 +31,48 @@ const product = {
   ],
 };
 
+const formatPrice = (price: string) => {
+  const [integerPart, decimalPart] = price.split(",");
+  return (
+    <span>
+      {integerPart},<span className="text-sm">{decimalPart}</span> zł
+    </span>
+  );
+};
+
 const ProductPage: React.FC = () => {
   const [currentImage, setCurrentImage] = useState(0);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [imageAnimation, setImageAnimation] = useState<string>("");
 
   const handleImageChange = (direction: string) => {
     if (direction === "next") {
+      setImageAnimation("slideInFromRight");
       setCurrentImage((prev) => (prev + 1) % product.images.length);
     } else {
+      setImageAnimation("slideInFromLeft");
       setCurrentImage((prev) =>
         prev === 0 ? product.images.length - 1 : prev - 1
       );
     }
+  };
+
+  // Reset animacji zdjęcia po zmianie zdjęcia
+  useEffect(() => {
+    setImageAnimation(""); // Resetujemy animację
+  }, [currentImage]);
+
+  // Obsługa gestów swipowania w modalu
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: () => handleImageChange("next"),
+    onSwipedRight: () => handleImageChange("prev"),
+    trackMouse: true,
+  });
+
+  // Funkcja do zmiany zdjęcia bez zamykania modalu
+  const handleImageClick = (index: number, e: React.MouseEvent) => {
+    e.stopPropagation(); // Zatrzymanie propagacji, aby nie zamykać modalu
+    setCurrentImage(index); // Zmiana zdjęcia
   };
 
   return (
@@ -50,16 +81,16 @@ const ProductPage: React.FC = () => {
       <div className="block lg:hidden mb-6">
         <h1 className="text-xl font-bold text-gray-800 mb-2">{product.name}</h1>
         <p className="text-lg font-semibold text-green-600 mb-4">
-          {product.price}
+          {formatPrice(product.price)}
         </p>
         <div className="flex flex-col gap-3">
-          <button className="bg-[#339FB8] text-white px-6 py-2 rounded-md shadow hover:bg-[#2b8fa6]">
+          <button className="bg-[#339FB8] text-white px-6 py-2 rounded-md shadow-md hover:bg-[#2b8fa6] transition-all duration-300 transform hover:scale-105">
             Kup teraz
           </button>
-          <button className="bg-gray-200 text-gray-800 px-6 py-2 rounded-md shadow hover:bg-gray-300">
+          <button className="bg-gray-200 text-gray-800 px-6 py-2 rounded-md shadow-md hover:bg-gray-300 transition-all duration-300 transform hover:scale-105">
             Zaproponuj cenę
           </button>
-          <button className="bg-[#339FB8] text-white px-6 py-2 rounded-md shadow hover:bg-[#2b8fa6]">
+          <button className="bg-[#339FB8] text-white px-6 py-2 rounded-md shadow-md hover:bg-[#2b8fa6] transition-all duration-300 transform hover:scale-105">
             Wyślij wiadomość
           </button>
         </div>
@@ -73,8 +104,9 @@ const ProductPage: React.FC = () => {
             <img
               src={product.images[currentImage]}
               alt={product.name}
-              className="w-full h-[100px] md:h-[600px] object-fit-cover rounded-xl shadow-md cursor-pointer"
+              className={`w-full h-[300px] md:h-[600px] object-cover rounded-xl shadow-md cursor-pointer transition-transform duration-500 ${imageAnimation} sm:w-full sm:h-[auto]`}
               onClick={() => setIsPreviewOpen(true)}
+              {...swipeHandlers} // Przypisanie handlerów swipe'a
             />
           </div>
 
@@ -82,7 +114,7 @@ const ProductPage: React.FC = () => {
             <div className="flex items-center justify-center gap-4 w-full flex-wrap">
               <button
                 onClick={() => handleImageChange("prev")}
-                className="hidden sm:flex bg-[#339FB8] text-white p-2 rounded-full shadow"
+                className="hidden sm:flex bg-[#339FB8] text-white p-2 rounded-full shadow-md hover:bg-[#2b8fa6] transition-all duration-300 transform hover:scale-110"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
@@ -93,8 +125,8 @@ const ProductPage: React.FC = () => {
                     key={index}
                     src={image}
                     alt={`Miniatura ${index + 1}`}
-                    onClick={() => setCurrentImage(index)}
-                    className={`w-20 h-20 object-cover rounded-lg cursor-pointer transition-transform duration-300 ${
+                    onClick={(e) => handleImageClick(index, e)} // Kliknięcie miniatury zmienia zdjęcie
+                    className={`w-20 h-20 object-cover rounded-lg cursor-pointer transition-transform duration-300 transform ${
                       currentImage === index
                         ? "scale-110 border-2 border-[#339FB8] opacity-90"
                         : "opacity-50 hover:scale-105"
@@ -105,7 +137,7 @@ const ProductPage: React.FC = () => {
 
               <button
                 onClick={() => handleImageChange("next")}
-                className="hidden sm:flex bg-[#339FB8] text-white p-2 rounded-full shadow"
+                className="hidden sm:flex bg-[#339FB8] text-white p-2 rounded-full shadow-md hover:bg-[#2b8fa6] transition-all duration-300 transform hover:scale-110"
               >
                 <ChevronRight className="w-5 h-5" />
               </button>
@@ -127,13 +159,15 @@ const ProductPage: React.FC = () => {
                 <b>INFORMACJE O SPRZEDAJĄCYM</b>
               </h3>
               <p className="text-sm text-gray-700">
-                Nazwa: {product.sellerName}
+                Nazwa: <span className="font-bold">{product.sellerName}</span>
               </p>
               <p className="text-sm text-gray-700">
-                Ocena: {product.sellerRating} ({product.sellerReviews} opinii)
+                Ocena: <span className="font-bold">{product.sellerRating}</span>{" "}
+                ({product.sellerReviews} opinii)
               </p>
               <p className="text-sm text-gray-700">
-                Dołączył: {product.sellerJoinDate}
+                Dołączył:{" "}
+                <span className="font-bold">{product.sellerJoinDate}</span>
               </p>
             </div>
 
@@ -168,18 +202,17 @@ const ProductPage: React.FC = () => {
               {product.name}
             </h1>
             <p className="text-xl font-semibold text-green-600 mb-4">
-              {product.price}
+              {formatPrice(product.price)}
             </p>
 
-            {/* PRZYCISKI Z POPRAWKĄ */}
             <div className="flex flex-col gap-3 mt-4">
-              <button className="bg-[#339FB8] text-white px-6 py-2 rounded-md shadow hover:bg-[#2b8fa6]">
+              <button className="bg-[#339FB8] text-white px-6 py-2 rounded-md shadow-md hover:bg-[#2b8fa6] transition-all duration-300">
                 Kup teraz
               </button>
-              <button className="bg-gray-200 text-gray-800 px-6 py-2 rounded-md shadow hover:bg-gray-300">
+              <button className="bg-gray-200 text-gray-800 px-6 py-2 rounded-md shadow-md hover:bg-gray-300 transition-all duration-300">
                 Zaproponuj cenę
               </button>
-              <button className="bg-[#339FB8] text-white px-6 py-2 rounded-md shadow hover:bg-[#2b8fa6]">
+              <button className="bg-[#339FB8] text-white px-6 py-2 rounded-md shadow-md hover:bg-[#2b8fa6] transition-all duration-300">
                 Wyślij wiadomość
               </button>
             </div>
@@ -189,12 +222,16 @@ const ProductPage: React.FC = () => {
             <h3 className="text-lg font-semibold text-gray-800 mb-2">
               <b>INFORMACJE O SPRZEDAJĄCYM</b>
             </h3>
-            <p className="text-sm text-gray-700">Nazwa: {product.sellerName}</p>
             <p className="text-sm text-gray-700">
-              Ocena: {product.sellerRating} ({product.sellerReviews} opinii)
+              Nazwa: <span className="font-bold">{product.sellerName}</span>
             </p>
             <p className="text-sm text-gray-700">
-              Dołączył: {product.sellerJoinDate}
+              Ocena: <span className="font-bold">{product.sellerRating}</span> (
+              {product.sellerReviews} opinii)
+            </p>
+            <p className="text-sm text-gray-700">
+              Dołączył:{" "}
+              <span className="font-bold">{product.sellerJoinDate}</span>
             </p>
           </div>
 
@@ -224,18 +261,39 @@ const ProductPage: React.FC = () => {
 
       {/* Modal zdjęcia */}
       {isPreviewOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center">
-          <img
-            src={product.images[currentImage]}
-            alt="Podgląd"
-            className="max-w-full max-h-full rounded-lg shadow-lg"
-          />
-          <button
-            onClick={() => setIsPreviewOpen(false)}
-            className="absolute top-4 right-4 text-white text-3xl bg-black bg-opacity-50 px-3 py-1 rounded-full"
-          >
-            &times;
-          </button>
+        <div
+          onClick={() => setIsPreviewOpen(false)} // Zamyka modal po kliknięciu w tło
+          className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center"
+        >
+          <div className="relative w-4/5 h-4/5">
+            <img
+              src={product.images[currentImage]}
+              alt="Podgląd"
+              className="w-full h-full object-cover rounded-lg shadow-lg modal-image"
+            />
+            <button
+              onClick={() => setIsPreviewOpen(false)}
+              className="absolute top-4 right-4 text-white text-3xl bg-black bg-opacity-50 px-3 py-1 rounded-full cursor-pointer"
+            >
+              &times;
+            </button>
+          </div>
+          {/* Miniatury zdjęć w modalnym podglądzie */}
+          <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
+            {product.images.map((image, index) => (
+              <img
+                key={index}
+                src={image}
+                alt={`Miniatura ${index + 1}`}
+                className={`w-16 h-16 object-cover rounded-lg cursor-pointer transition-transform duration-300 transform ${
+                  currentImage === index
+                    ? "scale-110 border-2 border-[#339FB8] opacity-90"
+                    : "opacity-50 hover:scale-105"
+                }`}
+                onClick={(e) => handleImageClick(index, e)} // Kliknięcie miniatury zmienia zdjęcie
+              />
+            ))}
+          </div>
         </div>
       )}
     </div>
