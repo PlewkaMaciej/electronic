@@ -90,7 +90,7 @@ const ProductPage: React.FC = () => {
           <button className="bg-gray-200 text-gray-800 px-6 py-2 rounded-md shadow-md hover:bg-gray-300 transition-all duration-300 transform hover:scale-105">
             Zaproponuj cenę
           </button>
-          <button className="bg-[#339FB8] text-white px-6 py-2 rounded-md shadow-md hover:bg-[#2b8fa6] transition-all duration-300 transform hover:scale-105">
+          <button className="bg-gray-200 text-white px-6 py-2 rounded-md shadow-md hover:bg-gray-300 transition-all duration-300 transform hover:scale-105">
             Wyślij wiadomość
           </button>
         </div>
@@ -106,7 +106,6 @@ const ProductPage: React.FC = () => {
               alt={product.name}
               className={`w-full h-[300px] md:h-[600px] object-cover rounded-xl shadow-md cursor-pointer transition-transform duration-500 ${imageAnimation} sm:w-full sm:h-[auto]`}
               onClick={() => setIsPreviewOpen(true)}
-              {...swipeHandlers} // Przypisanie handlerów swipe'a
             />
           </div>
 
@@ -212,7 +211,7 @@ const ProductPage: React.FC = () => {
               <button className="bg-gray-200 text-gray-800 px-6 py-2 rounded-md shadow-md hover:bg-gray-300 transition-all duration-300">
                 Zaproponuj cenę
               </button>
-              <button className="bg-[#339FB8] text-white px-6 py-2 rounded-md shadow-md hover:bg-[#2b8fa6] transition-all duration-300">
+              <button className="bg-gray-200 text-gray-800 px-6 py-2 rounded-md shadow-md hover:bg-gray-300 transition-all duration-300">
                 Wyślij wiadomość
               </button>
             </div>
@@ -262,14 +261,15 @@ const ProductPage: React.FC = () => {
       {/* Modal zdjęcia */}
       {isPreviewOpen && (
         <div
-          onClick={() => setIsPreviewOpen(false)} // Zamyka modal po kliknięciu w tło
+          onClick={() => setIsPreviewOpen(false)}
           className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center"
+          {...swipeHandlers} 
         >
-          <div className="relative w-4/5 h-4/5">
+          <div className="relative w-4/5 h-4/5 flex flex-col justify-center items-center">
             <img
               src={product.images[currentImage]}
               alt="Podgląd"
-              className="w-full h-full object-cover rounded-lg shadow-lg modal-image"
+              className="w-full h-[1000px] sm:h-[1000px] object-cover rounded-lg shadow-lg modal-image" 
             />
             <button
               onClick={() => setIsPreviewOpen(false)}
@@ -290,7 +290,7 @@ const ProductPage: React.FC = () => {
                     ? "scale-110 border-2 border-[#339FB8] opacity-90"
                     : "opacity-50 hover:scale-105"
                 }`}
-                onClick={(e) => handleImageClick(index, e)} // Kliknięcie miniatury zmienia zdjęcie
+                onClick={(e) => handleImageClick(index, e)} 
               />
             ))}
           </div>
