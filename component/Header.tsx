@@ -1,29 +1,33 @@
 import { useState } from "react";
-import {
-  Search,
-  Grid,
-  Tag,
-  Gavel,
-  Database,
-  Mail,
-  Menu,
-  X,
-} from "lucide-react";
+import { Search, Menu, X } from "lucide-react";
 
 function Header() {
-  const [isOpen, setIsOpen] = useState(false); // animacja menu
-  const [shouldRenderMenu, setShouldRenderMenu] = useState(false); // obecność w DOM
-  const [active, setActive] = useState("");
-  const [showModal, setShowModal] = useState(false);
-  const [isClosing, setIsClosing] = useState(false);
+  const categories = [
+    "Komputery",
+    "Laptopy",
+    "Telefony",
+    "Podzespoły i części",
+    "Fotografia",
+    "Smartwatche",
+    "RTV",
+    "AGD",
+    "Audio",
+    "Video",
+  ];
+
+  const [isOpen, setIsOpen] = useState(false); // Mobile menu state
+  const [shouldRenderMenu, setShouldRenderMenu] = useState(false); // Menu rendering state
+  const [active, setActive] = useState(""); // Active category state
+  const [showModal, setShowModal] = useState(false); // Modal visibility
+  const [isClosing, setIsClosing] = useState(false); // Modal closing animation
 
   const toggleMobileMenu = () => {
     if (isOpen) {
       setIsOpen(false);
-      setTimeout(() => setShouldRenderMenu(false), 300); // czas animacji zamykania
+      setTimeout(() => setShouldRenderMenu(false), 300); // Close animation delay
     } else {
       setShouldRenderMenu(true);
-      setTimeout(() => setIsOpen(true), 10); // lekki delay
+      setTimeout(() => setIsOpen(true), 10); // Open with slight delay
     }
   };
 
@@ -36,7 +40,7 @@ function Header() {
   };
 
   return (
-    <header className="bg-[#F0F1EC] p-4 shadow-lg relative">
+    <header className="bg-[#F0F1EC] p-4 shadow-lg">
       {/* Mobile Header */}
       <div className="flex items-center justify-between max-w-7xl mx-auto space-x-4 lg:hidden">
         <div className="flex flex-grow items-center bg-white rounded-lg shadow-lg p-2 border border-gray-300 transition-all duration-300 hover:shadow-xl">
@@ -94,31 +98,16 @@ function Header() {
       <div className="border-b border-gray-400 my-6 hidden lg:block"></div>
 
       {/* Desktop Navigation */}
-      <nav className="hidden lg:grid grid-cols-5 max-w-7xl mx-auto text-gray-700 font-semibold text-lg gap-6">
-        {[
-          { icon: Grid, text: "Kategorie" },
-          { icon: Tag, text: "Deals" },
-          { icon: Gavel, text: "Aukcje" },
-          { icon: Database, text: "Baza danych" },
-          { icon: Mail, text: "Kontakt" },
-        ].map(({ icon: Icon, text }, index) => (
+      <nav className="hidden lg:flex justify-between max-w-7xl mx-auto text-gray-700 font-semibold text-base gap-2">
+        {categories.map((text, index) => (
           <a
             key={index}
             href="#"
             onClick={() => setActive(text)}
-            className={`flex flex-col items-center space-y-2 p-2 rounded-lg transition-all duration-200 hover:scale-110 hover:shadow-md ${
-              active === text ? "text-black font-bold" : "hover:text-black"
+            className={`p-2 rounded transition-all duration-200 hover:text-black hover:scale-105 hover:shadow-md ${
+              active === text ? "text-black font-bold" : ""
             }`}
           >
-            <div
-              className={`p-3 rounded-full shadow-md transition-all duration-300 ${
-                active === text
-                  ? "bg-gray-400"
-                  : "bg-gray-200 hover:bg-gray-300"
-              }`}
-            >
-              <Icon className="w-8 h-8 text-gray-700" />
-            </div>
             {text}
           </a>
         ))}
@@ -129,7 +118,7 @@ function Header() {
         <div
           className={`${
             isOpen ? "menu-open" : "menu-close"
-          } lg:hidden flex flex-col items-center mt-4 bg-white shadow-lg rounded-lg p-4 space-y-4`}
+          } lg:hidden flex flex-col items-center mt-4 bg-white shadow-lg rounded-lg p-4 space-y-2 w-full`}
         >
           <h1 className="text-2xl font-bold text-[#2F4F4F] drop-shadow-md">
             Nazwa Aplikacji
@@ -148,27 +137,20 @@ function Header() {
 
           <div className="border-t border-gray-300 w-full"></div>
 
-          <nav className="flex flex-col items-center space-y-4 text-gray-700 font-semibold text-lg">
-            {[
-              { icon: Grid, text: "Kategorie" },
-              { icon: Tag, text: "Deals" },
-              { icon: Gavel, text: "Aukcje" },
-              { icon: Database, text: "Baza danych" },
-              { icon: Mail, text: "Kontakt" },
-            ].map(({ icon: Icon, text }, index) => (
+          <nav className="flex flex-wrap justify-between items-center w-full space-x-4 text-gray-700 font-semibold text-sm">
+            {categories.map((text, index) => (
               <a
                 key={index}
                 href="#"
                 onClick={() => {
                   setActive(text);
-                  toggleMobileMenu(); // zamykanie menu po kliknięciu
+                  toggleMobileMenu(); // Close menu after click
                 }}
-                className={`flex items-center space-x-3 p-2 rounded-lg transition-all duration-200 hover:scale-105 ${
-                  active === text ? "text-black font-bold" : "hover:text-black"
+                className={`p-2 rounded transition-all duration-200 hover:text-black hover:scale-105 hover:shadow-md ${
+                  active === text ? "text-black font-bold" : ""
                 }`}
               >
-                <Icon className="w-6 h-6 text-gray-700" />
-                <span>{text}</span>
+                {text}
               </a>
             ))}
           </nav>
