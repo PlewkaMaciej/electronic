@@ -15,19 +15,19 @@ function Header() {
     "Video",
   ];
 
-  const [isOpen, setIsOpen] = useState(false); // Mobile menu state
-  const [shouldRenderMenu, setShouldRenderMenu] = useState(false); // Menu rendering state
-  const [active, setActive] = useState(""); // Active category state
-  const [showModal, setShowModal] = useState(false); // Modal visibility
-  const [isClosing, setIsClosing] = useState(false); // Modal closing animation
+  const [isOpen, setIsOpen] = useState(false);
+  const [shouldRenderMenu, setShouldRenderMenu] = useState(false);
+  const [active, setActive] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   const toggleMobileMenu = () => {
     if (isOpen) {
       setIsOpen(false);
-      setTimeout(() => setShouldRenderMenu(false), 300); // Close animation delay
+      setTimeout(() => setShouldRenderMenu(false), 300);
     } else {
       setShouldRenderMenu(true);
-      setTimeout(() => setIsOpen(true), 10); // Open with slight delay
+      setTimeout(() => setIsOpen(true), 10);
     }
   };
 
@@ -144,7 +144,7 @@ function Header() {
                 href="#"
                 onClick={() => {
                   setActive(text);
-                  toggleMobileMenu(); // Close menu after click
+                  toggleMobileMenu();
                 }}
                 className={`p-2 rounded transition-all duration-200 hover:text-black hover:scale-105 hover:shadow-md ${
                   active === text ? "text-black font-bold" : ""

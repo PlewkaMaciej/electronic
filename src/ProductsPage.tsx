@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useSwipeable } from "react-swipeable"; // Importujemy hook do swipe'a
+import { useSwipeable } from "react-swipeable";
 
 const product = {
   id: 218636377,
@@ -57,27 +57,24 @@ const ProductPage: React.FC = () => {
     }
   };
 
-  // Reset animacji zdjęcia po zmianie zdjęcia
   useEffect(() => {
-    setImageAnimation(""); // Resetujemy animację
+    setImageAnimation("");
   }, [currentImage]);
 
-  // Obsługa gestów swipowania w modalu
   const swipeHandlers = useSwipeable({
     onSwipedLeft: () => handleImageChange("next"),
     onSwipedRight: () => handleImageChange("prev"),
     trackMouse: true,
   });
 
-  // Funkcja do zmiany zdjęcia bez zamykania modalu
   const handleImageClick = (index: number, e: React.MouseEvent) => {
-    e.stopPropagation(); // Zatrzymanie propagacji, aby nie zamykać modalu
-    setCurrentImage(index); // Zmiana zdjęcia
+    e.stopPropagation();
+    setCurrentImage(index);
   };
 
   return (
     <div className="container mx-auto py-8 px-4">
-      {/* Mobilny nagłówek i przyciski */}
+      {/* mobile header*/}
       <div className="block lg:hidden mb-6">
         <h1 className="text-xl font-bold text-gray-800 mb-2">{product.name}</h1>
         <p className="text-lg font-semibold text-green-600 mb-4">
@@ -96,9 +93,8 @@ const ProductPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Ogłoszenie */}
       <div className="flex flex-col lg:flex-row gap-6 border border-gray-200 p-6 rounded-2xl shadow-xl bg-white">
-        {/* Lewa kolumna - 70% */}
+        {/* left column*/}
         <div className="relative flex flex-col items-center bg-white rounded-lg p-4 max-w-md mx-auto lg:max-w-full lg:w-[70%]">
           <div className="bg-gray-50 p-4 rounded-lg shadow-sm mb-6">
             <img
@@ -124,7 +120,7 @@ const ProductPage: React.FC = () => {
                     key={index}
                     src={image}
                     alt={`Miniatura ${index + 1}`}
-                    onClick={(e) => handleImageClick(index, e)} // Kliknięcie miniatury zmienia zdjęcie
+                    onClick={(e) => handleImageClick(index, e)}
                     className={`w-20 h-20 object-cover rounded-lg cursor-pointer transition-transform duration-300 transform ${
                       currentImage === index
                         ? "scale-110 border-2 border-[#339FB8] opacity-90"
@@ -143,7 +139,7 @@ const ProductPage: React.FC = () => {
             </div>
           </div>
 
-          {/* OPIS PRODUKTU SECTION */}
+          {/* produdt description */}
           <div className="mt-6 w-full bg-gray-50 p-4 rounded-lg shadow-sm flex-1">
             <h2 className="text-lg font-semibold text-gray-800 mb-2">
               <b>OPIS PRODUKTU</b>
@@ -151,7 +147,7 @@ const ProductPage: React.FC = () => {
             <p className="text-sm text-gray-700">{product.description}</p>
           </div>
 
-          {/* SPECYFIKACJA SECTION */}
+          {/* specification section */}
           <div className="block lg:hidden space-y-6 mt-6 w-full">
             <div className="p-4 rounded-lg bg-gray-50 shadow-sm">
               <h3 className="text-lg font-semibold text-gray-800 mb-2">
@@ -194,7 +190,7 @@ const ProductPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Prawa kolumna - 30% */}
+        {/* right column */}
         <div className="hidden lg:block lg:w-[30%] space-y-6">
           <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
             <h1 className="text-2xl font-bold text-gray-800 mb-2">
@@ -258,18 +254,18 @@ const ProductPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal zdjęcia */}
+      {/* modal */}
       {isPreviewOpen && (
         <div
           onClick={() => setIsPreviewOpen(false)}
           className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center"
-          {...swipeHandlers} 
+          {...swipeHandlers}
         >
           <div className="relative w-4/5 h-4/5 flex flex-col justify-center items-center">
             <img
               src={product.images[currentImage]}
               alt="Podgląd"
-              className="w-full h-[1000px] sm:h-[1000px] object-cover rounded-lg shadow-lg modal-image" 
+              className="w-full h-[1000px] sm:h-[1000px] object-cover rounded-lg shadow-lg modal-image"
             />
             <button
               onClick={() => setIsPreviewOpen(false)}
@@ -278,7 +274,7 @@ const ProductPage: React.FC = () => {
               &times;
             </button>
           </div>
-          {/* Miniatury zdjęć w modalnym podglądzie */}
+          {/* small photos in modal */}
           <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
             {product.images.map((image, index) => (
               <img
@@ -290,7 +286,7 @@ const ProductPage: React.FC = () => {
                     ? "scale-110 border-2 border-[#339FB8] opacity-90"
                     : "opacity-50 hover:scale-105"
                 }`}
-                onClick={(e) => handleImageClick(index, e)} 
+                onClick={(e) => handleImageClick(index, e)}
               />
             ))}
           </div>

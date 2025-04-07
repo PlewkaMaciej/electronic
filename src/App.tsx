@@ -1,7 +1,7 @@
 import "./App.css";
 import { Routes, Route } from "react-router-dom";
 import Layout from "./Layout";
-import CarouselWrapper from "./Example";
+
 import RectangleAd from "../component/Items/RectangleAd";
 import Homepage from "./Homepage";
 import ProfileSettingsMain from "./ProfilSettingsMain";
@@ -15,7 +15,6 @@ function App() {
         <Route element={<Layout />}>
           <Route path="/Product/:id" element={<ProductPage />} />
           <Route path="/" element={<Homepage />} />
-          <Route path="/carousel" element={<CarouselWrapper />} />
           <Route path="/login-email" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route

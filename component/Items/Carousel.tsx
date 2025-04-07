@@ -19,8 +19,7 @@ interface CarouselProps {
 
 const Carousel: React.FC<CarouselProps> = ({ title, items, variant }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate(); // Hook do nawigacji
-
+  const navigate = useNavigate();
   const scroll = (scrollOffset: number) => {
     if (scrollRef.current) {
       scrollRef.current.scrollBy({ left: scrollOffset, behavior: "smooth" });
