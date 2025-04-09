@@ -40,7 +40,7 @@ function Header() {
   };
 
   return (
-    <header className="bg-[#F0F1EC] p-4 shadow-lg">
+    <header className="bg-[#E5E5E5] p-4 shadow-lg">
       {/* Mobile Header */}
       <div className="flex items-center justify-between max-w-7xl mx-auto space-x-4 lg:hidden">
         <div className="flex flex-grow items-center bg-white rounded-xl shadow p-2 border border-gray-300 transition-all duration-300 hover:shadow-md">
@@ -68,7 +68,7 @@ function Header() {
 
       {/* Desktop Header */}
       <div className="hidden lg:flex items-center justify-between max-w-7xl mx-auto py-4 space-x-8">
-        <h1 className="text-3xl font-extrabold text-[#2F4F4F] tracking-tight">
+        <h1 className="text-3xl font-extrabold text-[#4A4A4A] tracking-tight">
           Nazwa Aplikacji
         </h1>
 
@@ -90,7 +90,7 @@ function Header() {
           >
             Zaloguj się / Zarejestruj się
           </button>
-          <button className="bg-[#339FB8] text-white px-6 py-2 rounded-lg shadow hover:bg-[#2b8fa6] transition hover:shadow-lg cursor-pointer">
+          <button className="bg-[#4C6B8C] text-white px-6 py-2 rounded-lg shadow hover:bg-[#3c5572] transition hover:shadow-lg cursor-pointer">
             Sprzedaj
           </button>
         </div>
@@ -119,9 +119,9 @@ function Header() {
             isOpen ? "menu-open" : "menu-close"
           } lg:hidden flex flex-col items-center mt-4 bg-white shadow-lg rounded-xl p-4 space-y-3`}
         >
-          <h1 className="text-xl font-bold text-[#2F4F4F]">Nazwa Aplikacji</h1>
+          <h1 className="text-xl font-bold text-[#4A4A4A]">Nazwa Aplikacji</h1>
 
-          <button className="bg-[#339FB8] text-white px-5 py-2 rounded-lg shadow hover:bg-[#2b8fa6] transition w-full cursor-pointer">
+          <button className="bg-[#4C6B8C] text-white px-5 py-2 rounded-lg shadow hover:bg-[#3c5572] transition w-full cursor-pointer">
             Sprzedaj
           </button>
 
@@ -151,6 +151,73 @@ function Header() {
               </a>
             ))}
           </nav>
+        </div>
+      )}
+
+      {/* Modal */}
+      {showModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm"
+          onClick={handleCloseModal}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className={`${
+              isClosing ? "funky-exit" : "funky-enter"
+            } bg-white rounded-2xl shadow-2xl p-8 w-[90%] max-w-md text-center space-y-6 relative border border-gray-300`}
+          >
+            <button
+              onClick={handleCloseModal}
+              className="absolute top-4 right-4 text-gray-500 hover:text-black"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <h2 className="text-2xl font-bold text-[#4A4A4A]">
+              Zaloguj się by przenieść się do świata technologii
+            </h2>
+            <div className="flex flex-col space-y-4">
+              <a
+                href="/login-google"
+                className="bg-white border border-gray-300 shadow px-6 py-3 rounded-lg flex items-center justify-center space-x-3 hover:shadow-md transition"
+              >
+                <img
+                  src="https://www.svgrepo.com/show/475656/google-color.svg"
+                  alt="Google"
+                  className="w-5 h-5"
+                />
+                <span>Zaloguj się przez Google</span>
+              </a>
+              <a
+                href="/login-facebook"
+                className="bg-white border border-gray-300 shadow px-6 py-3 rounded-lg flex items-center justify-center space-x-3 hover:shadow-md transition text-[#1877F2]"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path d="M22.675 0H1.325C.593 0 0 .593 0 1.326v21.348C0 23.407.593 24 1.325 24h11.495v-9.294H9.691v-3.622h3.129V8.413c0-3.1 1.894-4.788 4.659-4.788 1.325 0 2.464.099 2.797.143v3.24l-1.918.001c-1.504 0-1.794.715-1.794 1.763v2.311h3.587l-.467 3.622h-3.12V24h6.116C23.407 24 24 23.407 24 22.674V1.326C24 .593 23.407 0 22.675 0z" />
+                </svg>
+                <span>Zaloguj się przez Facebook</span>
+              </a>
+              <a
+                href="/login-email"
+                className="text-[#4C6B8C] font-medium hover:underline"
+              >
+                Zaloguj się przez email
+              </a>
+            </div>
+            <p className="text-sm">
+              Nie masz konta?{" "}
+              <a
+                href="/register"
+                className="text-[#4C6B8C] font-semibold hover:underline"
+              >
+                Zarejestruj się
+              </a>
+            </p>
+          </div>
         </div>
       )}
     </header>

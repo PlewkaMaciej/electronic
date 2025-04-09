@@ -74,14 +74,14 @@ const ProductPage: React.FC = () => {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      {/* mobile header*/}
+      {/* mobile header */}
       <div className="block lg:hidden mb-6">
         <h1 className="text-xl font-bold text-gray-800 mb-2">{product.name}</h1>
-        <p className="text-lg font-semibold text-green-600 mb-4">
+        <p className="text-lg font-semibold text-[#006F91] mb-4">
           {formatPrice(product.price)}
         </p>
         <div className="flex flex-col gap-3">
-          <button className="bg-[#339FB8] text-white px-6 py-2 rounded-md shadow-md hover:bg-[#2b8fa6] transition-all duration-300 transform hover:scale-105">
+          <button className="bg-[#006F91] text-white px-6 py-2 rounded-md shadow-md hover:bg-[#00597A] transition-all duration-300 transform hover:scale-105">
             Kup teraz
           </button>
           <button className="bg-gray-200 text-gray-800 px-6 py-2 rounded-md shadow-md hover:bg-gray-300 transition-all duration-300 transform hover:scale-105">
@@ -94,7 +94,7 @@ const ProductPage: React.FC = () => {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6 border border-gray-200 p-6 rounded-2xl shadow-xl bg-white">
-        {/* left column*/}
+        {/* left column */}
         <div className="relative flex flex-col items-center bg-white rounded-lg p-4 max-w-md mx-auto lg:max-w-full lg:w-[70%]">
           <div className="bg-gray-50 p-4 rounded-lg shadow-sm mb-6">
             <img
@@ -109,7 +109,7 @@ const ProductPage: React.FC = () => {
             <div className="flex items-center justify-center gap-4 w-full flex-wrap">
               <button
                 onClick={() => handleImageChange("prev")}
-                className="hidden sm:flex bg-[#339FB8] text-white p-2 rounded-full shadow-md hover:bg-[#2b8fa6] transition-all duration-300 transform hover:scale-110"
+                className="hidden sm:flex bg-[#006F91] text-white p-2 rounded-full shadow-md hover:bg-[#00597A] transition-all duration-300 transform hover:scale-110"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
@@ -123,7 +123,7 @@ const ProductPage: React.FC = () => {
                     onClick={(e) => handleImageClick(index, e)}
                     className={`w-20 h-20 object-cover rounded-lg cursor-pointer transition-transform duration-300 transform ${
                       currentImage === index
-                        ? "scale-110 border-2 border-[#339FB8] opacity-90"
+                        ? "scale-110 border-2 border-[#006F91] opacity-90"
                         : "opacity-50 hover:scale-105"
                     }`}
                   />
@@ -132,14 +132,14 @@ const ProductPage: React.FC = () => {
 
               <button
                 onClick={() => handleImageChange("next")}
-                className="hidden sm:flex bg-[#339FB8] text-white p-2 rounded-full shadow-md hover:bg-[#2b8fa6] transition-all duration-300 transform hover:scale-110"
+                className="hidden sm:flex bg-[#006F91] text-white p-2 rounded-full shadow-md hover:bg-[#00597A] transition-all duration-300 transform hover:scale-110"
               >
                 <ChevronRight className="w-5 h-5" />
               </button>
             </div>
           </div>
 
-          {/* produdt description */}
+          {/* product description */}
           <div className="mt-6 w-full bg-gray-50 p-4 rounded-lg shadow-sm flex-1">
             <h2 className="text-lg font-semibold text-gray-800 mb-2">
               <b>OPIS PRODUKTU</b>
@@ -196,12 +196,12 @@ const ProductPage: React.FC = () => {
             <h1 className="text-2xl font-bold text-gray-800 mb-2">
               {product.name}
             </h1>
-            <p className="text-xl font-semibold text-green-600 mb-4">
+            <p className="text-xl font-semibold text-[#006F91] mb-4">
               {formatPrice(product.price)}
             </p>
 
             <div className="flex flex-col gap-3 mt-4">
-              <button className="bg-[#339FB8] text-white px-6 py-2 rounded-md shadow-md hover:bg-[#2b8fa6] transition-all duration-300">
+              <button className="bg-[#006F91] text-white px-6 py-2 rounded-md shadow-md hover:bg-[#00597A] transition-all duration-300">
                 Kup teraz
               </button>
               <button className="bg-gray-200 text-gray-800 px-6 py-2 rounded-md shadow-md hover:bg-gray-300 transition-all duration-300">
@@ -283,7 +283,7 @@ const ProductPage: React.FC = () => {
                 alt={`Miniatura ${index + 1}`}
                 className={`w-16 h-16 object-cover rounded-lg cursor-pointer transition-transform duration-300 transform ${
                   currentImage === index
-                    ? "scale-110 border-2 border-[#339FB8] opacity-90"
+                    ? "scale-110 border-2 border-[#006F91] opacity-90"
                     : "opacity-50 hover:scale-105"
                 }`}
                 onClick={(e) => handleImageClick(index, e)}
