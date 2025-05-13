@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useNavigate } from "react-router-dom"; // Importujemy hook do nawigacji
+import { useNavigate } from "react-router-dom";
 
 interface CarouselItem {
   name: string;
@@ -20,6 +20,7 @@ interface CarouselProps {
 const Carousel: React.FC<CarouselProps> = ({ title, items, variant }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+
   const scroll = (scrollOffset: number) => {
     if (scrollRef.current) {
       scrollRef.current.scrollBy({ left: scrollOffset, behavior: "smooth" });
@@ -27,9 +28,7 @@ const Carousel: React.FC<CarouselProps> = ({ title, items, variant }) => {
   };
 
   const handleClick = (id: number) => {
-    if (variant === "highlighted") {
-      navigate(`/Product/${id}`);
-    }
+    navigate(`/Product/${id}`);
   };
 
   return (
@@ -54,31 +53,35 @@ const Carousel: React.FC<CarouselProps> = ({ title, items, variant }) => {
           {items.map((item, index) => (
             <div
               key={index}
-              className="flex-shrink-0 w-[90%] sm:w-[260px] bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all"
+              className="flex-shrink-0 w-[90%] sm:w-[260px] bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all cursor-pointer"
               onClick={() => handleClick(item.id)}
             >
               <img
                 src={item.imageSrc}
                 alt={item.name}
-                className="w-full h-40 object-cover rounded-md shadow-md border border-gray-300"
+                className="w-full h-40 object-cover rounded-md shadow-md border border-gray-300 pointer-events-none"
               />
-              <h3 className="mt-2 text-lg font-semibold text-gray-700">
+              <h3 className="mt-2 text-lg font-semibold text-gray-700 pointer-events-none">
                 {item.name}
               </h3>
 
               {variant === "trusted" ? (
                 <>
-                  <p className="text-sm text-gray-600">{item.specification}</p>
-                  <button className="mt-2 w-full bg-[#006F91] text-white py-1 rounded-md hover:bg-[#00597A]">
+                  <p className="text-sm text-gray-600 pointer-events-none">
+                    {item.specification}
+                  </p>
+                  <div className="mt-2 w-full bg-[#006F91] text-white py-1 rounded-md hover:bg-[#00597A] text-center font-medium pointer-events-none">
                     Sprawdź Produkty
-                  </button>
+                  </div>
                 </>
               ) : (
                 <>
-                  <p className="text-lg font-bold text-green-600">
+                  <p className="text-lg font-bold text-green-600 pointer-events-none">
                     {item.price}
                   </p>
-                  <p className="text-sm text-gray-500">{item.date}</p>
+                  <p className="text-sm text-gray-500 pointer-events-none">
+                    {item.date}
+                  </p>
                 </>
               )}
             </div>
