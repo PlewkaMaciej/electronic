@@ -1,7 +1,7 @@
 import "./App.css";
 import { Routes, Route } from "react-router-dom";
 import Layout from "./Layout";
-
+import OfferSearch from "./OffersSearch";
 import RectangleAd from "../component/Items/RectangleAd";
 import Homepage from "./Homepage";
 import ProfileSettingsMain from "./ProfilSettingsMain";
@@ -14,6 +14,7 @@ function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route path="/Product/:id" element={<ProductPage />} />
+          <Route path="/offerSearch" element={<OfferSearch />} />
           <Route path="/" element={<Homepage />} />
           <Route path="/login-email" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
