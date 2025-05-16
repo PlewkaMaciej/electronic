@@ -1,4 +1,5 @@
 @import "tailwindcss";
+
 @keyframes funkyAppear {
   0% {
     opacity: 0;
@@ -32,6 +33,7 @@
 .funky-exit {
   animation: funkyDisappear 0.4s ease-in forwards;
 }
+
 @keyframes slideDown {
   0% {
     opacity: 0;
@@ -68,4 +70,110 @@
   animation: slideUp 0.3s ease-in forwards;
   transform-origin: top;
   overflow: hidden;
+}
+
+@keyframes zoomIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes zoomOut {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+}
+
+.modal-image {
+  animation: zoomIn 0.5s ease-in-out forwards;
+}
+
+.modal-close {
+  animation: zoomOut 0.5s ease-in-out forwards;
+}
+
+/* New animations */
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out forwards;
+}
+
+.fade-out {
+  animation: fadeOut 0.5s ease-in-out forwards;
+}
+
+@keyframes scaleUp {
+  0% {
+    transform: scale(0.8);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes scaleDown {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0.8);
+  }
+}
+
+.scale-up {
+  animation: scaleUp 0.3s ease-in-out forwards;
+}
+
+.scale-down {
+  animation: scaleDown 0.3s ease-in-out forwards;
+}
+
+@keyframes bounce {
+  0% {
+    transform: translateY(0);
+  }
+  25% {
+    transform: translateY(-10px);
+  }
+  50% {
+    transform: translateY(0);
+  }
+  75% {
+    transform: translateY(-5px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.bounce {
+  animation: bounce 0.5s ease-in-out forwards;
 }

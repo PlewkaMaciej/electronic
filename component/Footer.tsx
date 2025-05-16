@@ -1,129 +1,102 @@
 import React from "react";
 import { Mail } from "lucide-react";
-import StyleInput from "./Items/StyleInput"
+import StyleInput from "./Items/StyleInput";
+
 function Footer() {
   return (
-    <footer className="bg-[#F0F1EC] py-8 shadow-xl mt-10 border-t border-gray-300">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center px-6 space-y-6 md:space-y-0">
-        <div className="flex flex-col md:flex-row md:space-x-12 space-y-6 md:space-y-0 text-center md:text-left">
-          {/* Pierwsza kolumna */}
-          <div className="flex flex-col space-y-3">
-            <h2 className="text-xl md:text-2xl font-bold text-gray-800 border-b-2 border-gray-400 pb-2">
+    <footer className="bg-[#F5F7FA] py-10 mt-16 border-t border-gray-300 shadow-inner">
+      <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-10">
+        {/* Column Container */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 w-full">
+          {/* Column 1 */}
+          <div className="flex flex-col space-y-3 text-center md:text-left">
+            <h2 className="text-2xl font-semibold text-gray-800 border-b pb-2 border-gray-400">
               Giełda Elektroniki Używanej
             </h2>
-            <a
-              href="#"
-              className="text-gray-600 hover:text-gray-900 transition duration-300"
-            >
-              O nas
-            </a>
-            <a
-              href="#"
-              className="text-gray-600 hover:text-gray-900 transition duration-300"
-            >
-              Pracuj z nami
-            </a>
-            <a
-              href="#"
-              className="text-gray-600 hover:text-gray-900 transition duration-300"
-            >
-              Informacje ogólne
-            </a>
-            <a
-              href="#"
-              className="text-gray-600 hover:text-gray-900 transition duration-300"
-            >
-              Kontakt
-            </a>
+            {["O nas", "Pracuj z nami", "Informacje ogólne", "Kontakt"].map(
+              (text) => (
+                <a
+                  key={text}
+                  href="#"
+                  className="text-gray-600 hover:text-gray-900 hover:underline transition duration-300"
+                >
+                  {text}
+                </a>
+              )
+            )}
           </div>
 
-          {/* Druga kolumna */}
-          <div className="flex flex-col space-y-3">
-            <h2 className="text-xl md:text-2xl font-bold text-gray-800 border-b-2 border-gray-400 pb-2">
+          {/* Column 2 */}
+          <div className="flex flex-col space-y-3 text-center md:text-left">
+            <h2 className="text-2xl font-semibold text-gray-800 border-b pb-2 border-gray-400">
               Pomoc
             </h2>
-            <a
-              href="#"
-              className="text-gray-600 hover:text-gray-900 transition duration-300"
-            >
-              Centrum pomocy
-            </a>
-            <a
-              href="#"
-              className="text-gray-600 hover:text-gray-900 transition duration-300"
-            >
-              Informacje dla sprzedających
-            </a>
-            <a
-              href="#"
-              className="text-gray-600 hover:text-gray-900 transition duration-300"
-            >
-              Informacje dla kupujących
-            </a>
-            <a
-              href="#"
-              className="text-gray-600 hover:text-gray-900 transition duration-300"
-            >
-              Polityka bezpieczeństwa
-            </a>
-            <a
-              href="#"
-              className="text-gray-600 hover:text-gray-900 transition duration-300"
-            >
-              Polityka rozstrzygania sporów
-            </a>
+            {[
+              "Centrum pomocy",
+              "Informacje dla sprzedających",
+              "Informacje dla kupujących",
+              "Polityka bezpieczeństwa",
+              "Polityka rozstrzygania sporów",
+            ].map((text) => (
+              <a
+                key={text}
+                href="#"
+                className="text-gray-600 hover:text-gray-900 hover:underline transition duration-300"
+              >
+                {text}
+              </a>
+            ))}
           </div>
 
-          {/* Trzecia kolumna */}
-          <div className="flex flex-col space-y-3">
-            <h2 className="text-xl md:text-2xl font-bold text-gray-800 border-b-2 border-gray-400 pb-2">
+          {/* Column 3 */}
+          <div className="flex flex-col space-y-3 text-center md:text-left">
+            <h2 className="text-2xl font-semibold text-gray-800 border-b pb-2 border-gray-400">
               Dowiedz się więcej
             </h2>
-            <a
-              href="#"
-              className="text-gray-600 hover:text-gray-900 transition duration-300"
-            >
-              Program afiliacyjny
-            </a>
-            <a
-              href="#"
-              className="text-gray-600 hover:text-gray-900 transition duration-300"
-            >
-              Oferta dla przedsiębiorców
-            </a>
-            <a
-              href="#"
-              className="text-gray-600 hover:text-gray-900 transition duration-300"
-            >
-              Twoja reklama na GEU
-            </a>
+            {[
+              "Program afiliacyjny",
+              "Oferta dla przedsiębiorców",
+              "Twoja reklama na GEU",
+            ].map((text) => (
+              <a
+                key={text}
+                href="#"
+                className="text-gray-600 hover:text-gray-900 hover:underline transition duration-300"
+              >
+                {text}
+              </a>
+            ))}
           </div>
         </div>
 
-        {/* Logo - centrowane na mobile */}
-        <div className="p-4 bg-white shadow-md rounded-lg border border-gray-300">
-          <img
-            src="/path-to-logo.png"
-            alt="Logo"
-            className="w-16 h-16 object-contain mx-auto"
-          />
+        {/* Logo Section */}
+        <div className="flex justify-center w-full md:w-auto">
+          <div className="p-4 bg-white shadow-lg rounded-xl border border-gray-300">
+            <img
+              src="/path-to-logo.png"
+              alt="Logo"
+              className="w-20 h-20 object-contain"
+            />
+          </div>
         </div>
       </div>
 
-      {/* Dodatkowe linki - responsywne i centrowane */}
-      <div className="max-w-7xl mx-auto mt-6 px-4 text-center text-gray-600 text-sm flex flex-col md:flex-row justify-center space-y-3 md:space-y-0 md:space-x-6 border-t border-gray-300 pt-4">
-        <a href="#" className="hover:text-gray-900 transition duration-300">
-          Regulamin
-        </a>
-        <a href="#" className="hover:text-gray-900 transition duration-300">
-          Polityka prywatności
-        </a>
-        <a href="#" className="hover:text-gray-900 transition duration-300">
-          Polityka cookies
-        </a>
-        <a href="#" className="hover:text-gray-900 transition duration-300">
-          Ustawienia plików cookie
-        </a>
+      {/* Bottom Links */}
+      <div className="max-w-7xl mx-auto mt-8 px-6 border-t pt-4 border-gray-300 flex flex-col md:flex-row justify-center items-center text-sm text-gray-600 space-y-3 md:space-y-0 md:space-x-6 text-center">
+        {[
+          "Regulamin",
+          "Polityka prywatności",
+          "Polityka cookies",
+          "Ustawienia plików cookie",
+        ].map((text) => (
+          <a
+            key={text}
+            href="#"
+            className="hover:text-gray-800 hover:underline transition duration-300"
+          >
+            {text}
+          </a>
+        ))}
       </div>
     </footer>
   );

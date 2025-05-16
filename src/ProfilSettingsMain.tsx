@@ -9,7 +9,7 @@ const ProfileSettingsMain = () => {
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
-      setSelectedFile(event.target.files[0]); // Teraz typ pasuje
+      setSelectedFile(event.target.files[0]); 
     }
   };
   
@@ -18,7 +18,7 @@ const ProfileSettingsMain = () => {
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-xl border border-gray-300">
       <h2 className="text-2xl font-bold text-gray-800 mb-4">Ustawienia</h2>
       
-      {/* Navigation */}
+      
       <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4 mb-6">
         {[{ icon: User, label: "Profil" }, { icon: Lock, label: "Konto i bezpieczeństwo" }, { icon: Package, label: "Wysyłka" }, { icon: Shield, label: "Prywatność" }, { icon: Globe, label: "Sprzedawanie" }].map(({ icon: Icon, label }, index) => (
           <ButtonStyle key={index} className="flex items-center gap-2 w-full md:w-auto">
