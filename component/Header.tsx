@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Search, Menu, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 function Header() {
   const categories = [
@@ -83,7 +84,11 @@ function Header() {
   const handleMenuClick = () => {
     setIsAccountMenuOpen(false);
   };
-
+  const navigate = useNavigate();
+  const handleCategoryClick = (category: string) => {
+    setActive(category);
+    navigate(`/offer-search?category=${encodeURIComponent(category)}`);
+  };
   return (
     <header className="bg-[#E5E5E5] p-4 shadow-lg relative">
       {/* Mobile Header */}
@@ -285,7 +290,10 @@ function Header() {
           <a
             key={index}
             href="#"
-            onClick={() => setActive(text)}
+            onClick={(e) => {
+              e.preventDefault();
+              handleCategoryClick(text);
+            }}
             className={`px-3 py-1.5 rounded transition hover:text-black hover:scale-105 hover:shadow-sm cursor-pointer ${
               active === text ? "text-black font-bold" : ""
             }`}
@@ -326,8 +334,9 @@ function Header() {
               <a
                 key={index}
                 href="#"
-                onClick={() => {
-                  setActive(text);
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleCategoryClick(text);
                   toggleMobileMenu();
                 }}
                 className={`px-3 py-1 rounded transition hover:text-black hover:scale-105 hover:shadow-sm cursor-pointer ${

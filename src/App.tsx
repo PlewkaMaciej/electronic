@@ -14,7 +14,7 @@ function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route path="/Product/:id" element={<ProductPage />} />
-          <Route path="/offerSearch" element={<OfferSearch />} />
+          <Route path="/offer-search" element={<OfferSearch />} />
           <Route path="/" element={<Homepage />} />
           <Route path="/login-email" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
