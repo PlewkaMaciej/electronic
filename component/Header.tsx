@@ -1,27 +1,36 @@
-import { useState, useEffect, useRef } from "react";
-import {
-  Search,
-  Grid,
-  Tag,
-  Gavel,
-  Database,
-  Mail,
-  Menu,
-  X,
-} from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Search, Menu, X } from "lucide-react";
 
 function Header() {
-  const [isOpen, setIsOpen] = useState(false); // animacja menu mobilnego
-  const [shouldRenderMenu, setShouldRenderMenu] = useState(false); // obecność menu mobilnego w DOM
+  const categories = [
+    "Komputery",
+    "Laptopy",
+    "Telefony",
+    "Podzespoły i części",
+    "Fotografia",
+    "Smartwatche",
+    "RTV",
+    "AGD",
+    "Audio",
+    "Video",
+  ];
+
+  // Symulacja stanu logowania (zmień wg własnej logiki)
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Menu mobilne
+  const [isOpen, setIsOpen] = useState(false);
+  const [shouldRenderMenu, setShouldRenderMenu] = useState(false);
   const [active, setActive] = useState("");
+  // Modal logowania
   const [showModal, setShowModal] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
-  const [showAccountMenu, setShowAccountMenu] = useState(false);
 
-  const accountMenuButtonRef = useRef<HTMLButtonElement>(null);
+  // Menu Twoje Konto
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const accountMenuRef = useRef<HTMLDivElement>(null);
 
-  // Toggle mobile menu
+  // Toggle menu mobilnego
   const toggleMobileMenu = () => {
     if (isOpen) {
       setIsOpen(false);
@@ -32,13 +41,7 @@ function Header() {
     }
   };
 
-  // Toggle "Twoje konto" menu
-  const toggleAccountMenu = (e?: React.MouseEvent) => {
-    e?.stopPropagation(); // zapobiega zamknięciu po kliknięciu w przycisk
-    setShowAccountMenu((prev) => !prev);
-  };
-
-  // Zamknij modal z animacją
+  // Modal logowania
   const handleCloseModal = () => {
     setIsClosing(true);
     setTimeout(() => {
@@ -47,41 +50,57 @@ function Header() {
     }, 400);
   };
 
-  // Zamknięcie menu "Twoje konto" po kliknięciu poza menu lub poza przyciskiem
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        showAccountMenu &&
-        accountMenuRef.current &&
-        !accountMenuRef.current.contains(event.target as Node) &&
-        accountMenuButtonRef.current &&
-        !accountMenuButtonRef.current.contains(event.target as Node)
-      ) {
-        setShowAccountMenu(false);
-      }
-    };
+  // Toggle menu Twoje Konto
+  const toggleAccountMenu = () => {
+    setIsAccountMenuOpen((prev) => !prev);
+  };
 
+  // Zamknij menu Twoje Konto przy kliknięciu poza nim
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        isAccountMenuOpen &&
+        accountMenuRef.current &&
+        !accountMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsAccountMenuOpen(false);
+      }
+    }
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [showAccountMenu]);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isAccountMenuOpen]);
+
+  // Przykładowa funkcja wylogowania
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setIsAccountMenuOpen(false);
+    alert("Wylogowano!");
+  };
+
+  // Funkcja obsługująca kliknięcie w link menu - zamyka menu
+  const handleMenuClick = () => {
+    setIsAccountMenuOpen(false);
+  };
 
   return (
-    <header className="bg-[#F0F1EC] p-4 shadow-lg relative">
+    <header className="bg-[#E5E5E5] p-4 shadow-lg relative">
       {/* Mobile Header */}
       <div className="flex items-center justify-between max-w-7xl mx-auto space-x-4 lg:hidden">
-        <div className="flex flex-grow items-center bg-white rounded-lg shadow-lg p-2 border border-gray-300 transition-all duration-300 hover:shadow-xl">
+        <div className="flex flex-grow items-center bg-white rounded-xl shadow p-2 border border-gray-300 transition-all duration-300 hover:shadow-md">
           <input
             type="text"
             placeholder="Czego dziś szukasz?"
-            className="flex-grow px-3 py-2 outline-none bg-transparent text-base"
+            className="flex-grow px-3 py-2 outline-none bg-transparent text-base placeholder-gray-500"
           />
-          <button className="ml-2 p-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition-all duration-200">
+          <button className="ml-2 p-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition duration-200 cursor-pointer">
             <Search className="text-gray-500 w-5 h-5" />
           </button>
         </div>
 
         <button
-          className="p-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition-all"
+          className="p-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition cursor-pointer"
           onClick={toggleMobileMenu}
         >
           {isOpen ? (
@@ -93,202 +112,229 @@ function Header() {
       </div>
 
       {/* Desktop Header */}
-      <div className="hidden lg:flex items-center justify-between max-w-7xl mx-auto space-x-6">
-        <h1 className="text-3xl font-bold text-[#2F4F4F] flex-shrink-0 drop-shadow-md">
+      <div className="hidden lg:flex items-center justify-between max-w-7xl mx-auto py-4 space-x-8">
+        <h1 className="text-3xl font-extrabold text-[#4A4A4A] tracking-tight">
           Nazwa Aplikacji
         </h1>
 
-        <div className="flex flex-grow items-center bg-white rounded-lg shadow-lg p-2 max-w-md border border-gray-300 transition-all duration-300 hover:shadow-xl">
+        <div className="flex flex-grow items-center bg-white rounded-xl shadow p-2 max-w-lg border border-gray-300 transition-all duration-300 hover:shadow-md">
           <input
             type="text"
             placeholder="Czego dziś szukasz?"
-            className="flex-grow px-3 py-2 outline-none bg-transparent text-base"
+            className="flex-grow px-3 py-2 outline-none bg-transparent text-base placeholder-gray-500"
           />
-          <button className="ml-2 p-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition-all duration-200">
+          <button className="ml-2 p-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition duration-200 cursor-pointer">
             <Search className="text-gray-500 w-5 h-5" />
           </button>
         </div>
 
-        <button className="bg-[#339FB8] text-white px-8 py-3 rounded-lg shadow-md text-lg hover:bg-[#2b8fa6] transition-all duration-200 hover:shadow-xl">
-          Sprzedaj
-        </button>
+        <div className="flex gap-4 items-center relative">
+          {!isLoggedIn ? (
+            <>
+              <button
+                onClick={toggleAccountMenu}
+                className="bg-gray-300 text-gray-800 px-6 py-2 rounded-lg shadow hover:bg-gray-400 transition cursor-pointer"
+              >
+                Twoje konto
+              </button>
 
-        <div className="relative">
-          <button
-            ref={accountMenuButtonRef}
-            onClick={toggleAccountMenu}
-            className="bg-gray-300 text-gray-800 px-8 py-3 rounded-lg shadow-md text-lg hover:bg-gray-400 transition-all duration-200"
-          >
-            Twoje konto
-          </button>
-
-          {showAccountMenu && (
-            <div
-              ref={accountMenuRef}
-              className="absolute right-0 mt-2 w-64 bg-white border border-gray-300 rounded-lg shadow-lg z-50 text-gray-700 font-medium"
-            >
-              <nav className="flex flex-col divide-y divide-gray-200">
-                <a
-                  href="/dashboard"
-                  className="px-4 py-2 font-bold hover:bg-gray-100 cursor-pointer"
+              {isAccountMenuOpen && (
+                <div
+                  ref={accountMenuRef}
+                  className="absolute right-0 top-full mt-2 w-56 bg-white border border-gray-300 rounded-lg shadow-lg z-50"
                 >
-                  Panel Sterowania
-                </a>
-                <a
-                  href="/MyAds"
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                >
-                  Moje Ogłoszenia
-                </a>
-                <a
-                  href="/MyOrders"
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                >
-                  Moje Zamówienia
-                </a>
-                <a
-                  href="/Chat"
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                >
-                  Czat
-                </a>
-                <a
-                  href="/FollowingAds"
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                >
-                  Obserwowane
-                </a>
-                <a
-                  href="/Wallet"
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                >
-                  Portfel
-                </a>
-                <a
-                  href="/Help"
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                >
-                  Pomoc
-                </a>
-
-                <a
-                  href="/settings"
-                  className="px-4 py-2 font-bold hover:bg-gray-100 cursor-pointer"
-                >
-                  Ustawienia
-                </a>
-                <a
-                  href="/MyProfile"
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                >
-                  Profil
-                </a>
-                <a
-                  href="/Security"
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                >
-                  Konto i bezpieczeństwo
-                </a>
-                <a
-                  href="/shipment"
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                >
-                  Wysyłka
-                </a>
-                <a
-                  href="/selling"
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                >
-                  Sprzedawanie
-                </a>
-                <a
-                  href="/logout"
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-600 font-semibold"
-                >
-                  Wyloguj się
-                </a>
-              </nav>
-            </div>
+                  <ul className="flex flex-col divide-y divide-gray-200">
+                    <li>
+                      <a
+                        href="/dashboard"
+                        className="block px-4 py-2 font-bold hover:bg-gray-100"
+                        onClick={handleMenuClick}
+                      >
+                        Panel sterowania
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="/my-ads"
+                        className="block px-4 py-2 hover:bg-gray-100"
+                        onClick={handleMenuClick}
+                      >
+                        Moje ogłoszenia
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="/my-orders"
+                        className="block px-4 py-2 hover:bg-gray-100"
+                        onClick={handleMenuClick}
+                      >
+                        Moje zamówienia
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="/chat"
+                        className="block px-4 py-2 hover:bg-gray-100"
+                        onClick={handleMenuClick}
+                      >
+                        Czat
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="/favorites"
+                        className="block px-4 py-2 hover:bg-gray-100"
+                        onClick={handleMenuClick}
+                      >
+                        Obserwowane
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="/wallet"
+                        className="block px-4 py-2 hover:bg-gray-100"
+                        onClick={handleMenuClick}
+                      >
+                        Portfel
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="/help"
+                        className="block px-4 py-2 hover:bg-gray-100"
+                        onClick={handleMenuClick}
+                      >
+                        Pomoc
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="/settings"
+                        className="block px-4 py-2 font-bold hover:bg-gray-100"
+                        onClick={handleMenuClick}
+                      >
+                        Ustawienia
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="/profile"
+                        className="block px-4 py-2 hover:bg-gray-100"
+                        onClick={handleMenuClick}
+                      >
+                        Profil
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="/account-security"
+                        className="block px-4 py-2 hover:bg-gray-100"
+                        onClick={handleMenuClick}
+                      >
+                        Konto i bezpieczeństwo
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="/shipping"
+                        className="block px-4 py-2 hover:bg-gray-100"
+                        onClick={handleMenuClick}
+                      >
+                        Wysyłka
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="/privacy"
+                        className="block px-4 py-2 hover:bg-gray-100"
+                        onClick={handleMenuClick}
+                      >
+                        Prywatność
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="/selling"
+                        className="block px-4 py-2 hover:bg-gray-100"
+                        onClick={handleMenuClick}
+                      >
+                        Sprzedawanie
+                      </a>
+                    </li>
+                    <li
+                      className="px-4 py-2 cursor-pointer hover:bg-red-500 hover:text-white font-semibold"
+                      onClick={handleLogout}
+                    >
+                      Wyloguj się
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </>
+          ) : (
+            <button className="bg-[#4C6B8C] text-white px-6 py-2 rounded-lg shadow hover:bg-[#3c5572] transition hover:shadow-lg cursor-pointer">
+              Sprzedaj
+            </button>
           )}
         </div>
       </div>
 
-      <div className="border-b border-gray-400 my-6 hidden lg:block"></div>
-
       {/* Desktop Navigation */}
-      <nav className="hidden lg:grid grid-cols-5 max-w-7xl mx-auto text-gray-700 font-semibold text-lg gap-6">
-        {[
-          { icon: Grid, text: "Kategorie" },
-          { icon: Tag, text: "Deals" },
-          { icon: Gavel, text: "Aukcje" },
-          { icon: Database, text: "Baza danych" },
-          { icon: Mail, text: "Kontakt" },
-        ].map(({ icon: Icon, text }, index) => (
+      <nav className="hidden lg:flex justify-center max-w-7xl mx-auto text-gray-700 font-medium text-base gap-3 mt-4 flex-wrap">
+        {categories.map((text, index) => (
           <a
             key={index}
             href="#"
             onClick={() => setActive(text)}
-            className={`flex flex-col items-center space-y-2 p-2 rounded-lg transition-all duration-200 hover:scale-110 hover:shadow-md ${
-              active === text ? "text-black font-bold" : "hover:text-black"
+            className={`px-3 py-1.5 rounded transition hover:text-black hover:scale-105 hover:shadow-sm cursor-pointer ${
+              active === text ? "text-black font-bold" : ""
             }`}
           >
-            <div
-              className={`p-3 rounded-full shadow-md transition-all duration-300 ${
-                active === text ? "bg-gray-400" : "bg-gray-200 hover:bg-gray-300"
-              }`}
-            >
-              <Icon className="w-8 h-8 text-gray-700" />
-            </div>
             {text}
           </a>
         ))}
       </nav>
 
-      {/* Mobile Nav */}
+      {/* Mobile Menu */}
       {shouldRenderMenu && (
         <div
           className={`${
             isOpen ? "menu-open" : "menu-close"
-          } lg:hidden flex flex-col items-center mt-4 bg-white shadow-lg rounded-lg p-4 space-y-4`}
+          } lg:hidden flex flex-col items-center mt-4 bg-white shadow-lg rounded-xl p-4 space-y-3`}
         >
-          <h1 className="text-2xl font-bold text-[#2F4F4F] drop-shadow-md">
-            Nazwa Aplikacji
-          </h1>
+          <h1 className="text-xl font-bold text-[#4A4A4A]">Nazwa Aplikacji</h1>
 
-          <button className="bg-[#339FB8] text-white px-6 py-2 rounded-lg shadow-md hover:bg-[#2b8fa6] transition-all duration-200">
-            Sprzedaj
-          </button>
+          {isLoggedIn && (
+            <button className="bg-[#4C6B8C] text-white px-5 py-2 rounded-lg shadow hover:bg-[#3c5572] transition w-full cursor-pointer">
+              Sprzedaj
+            </button>
+          )}
 
-          <button
-            onClick={() => setShowModal(true)}
-            className="bg-gray-300 text-gray-800 px-6 py-2 rounded-lg shadow-md hover:bg-gray-400 transition-all duration-200"
-          >
-            Zarejestruj się / Zaloguj się
-          </button>
+          {!isLoggedIn && (
+            <button
+              onClick={() => setShowModal(true)}
+              className="bg-gray-300 text-gray-800 px-5 py-2 rounded-lg shadow hover:bg-gray-400 transition w-full cursor-pointer"
+            >
+              Zaloguj się / Zarejestruj się
+            </button>
+          )}
 
-          <div className="border-t border-gray-300 w-full"></div>
+          <div className="border-t border-gray-300 w-full my-2" />
 
-          <nav className="flex flex-col items-center space-y-4 text-gray-700 font-semibold text-lg">
-            {[
-              { icon: Grid, text: "Kategorie" },
-              { icon: Tag, text: "Deals" },
-              { icon: Gavel, text: "Aukcje" },
-              { icon: Database, text: "Baza danych" },
-              { icon: Mail, text: "Kontakt" },
-            ].map(({ icon: Icon, text }, index) => (
+          <nav className="flex flex-wrap justify-center items-center gap-3 text-gray-700 font-medium text-sm">
+            {categories.map((text, index) => (
               <a
                 key={index}
                 href="#"
                 onClick={() => {
                   setActive(text);
-                  toggleMobileMenu(); // zamyka menu po kliknięciu
+                  toggleMobileMenu();
                 }}
-                className={`flex items-center space-x-3 p-2 rounded-lg transition-all duration-200 hover:scale-105 ${
-                  active === text ? "text-black font-bold" : "hover:text-black"
+                className={`px-3 py-1 rounded transition hover:text-black hover:scale-105 hover:shadow-sm cursor-pointer ${
+                  active === text ? "text-black font-bold" : ""
                 }`}
               >
-                <Icon className="w-6 h-6 text-gray-700" />
-                <span>{text}</span>
+                {text}
               </a>
             ))}
           </nav>
@@ -313,54 +359,28 @@ function Header() {
             >
               <X className="w-6 h-6" />
             </button>
-
-            <h2 className="text-2xl font-bold text-[#2F4F4F]">
+            <h2 className="text-2xl font-bold text-[#4A4A4A]">
               Zaloguj się by przenieść się do świata technologii
             </h2>
-
             <div className="flex flex-col space-y-4">
               <a
                 href="/login-google"
-                className="bg-white border border-gray-300 shadow px-6 py-3 rounded-lg flex items-center justify-center space-x-3 hover:shadow-md transition"
+                className="flex items-center justify-center gap-4 bg-[#4285F4] hover:bg-[#3367D6] text-white px-6 py-3 rounded-full font-semibold cursor-pointer transition"
               >
                 <img
-                  src="https://www.svgrepo.com/show/475656/google-color.svg"
-                  alt="Google"
-                  className="w-5 h-5"
+                  src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"
+                  alt="Google Logo"
+                  className="w-6 h-6"
                 />
-                <span>Zaloguj się przez Google</span>
+                Zaloguj się z Google
               </a>
-              <a
-                href="/login-facebook"
-                className="bg-white border border-gray-300 shadow px-6 py-3 rounded-lg flex items-center justify-center space-x-3 hover:shadow-md transition text-[#1877F2]"
+              <button
+                className="bg-gray-300 text-gray-800 px-6 py-3 rounded-full font-semibold hover:bg-gray-400 transition cursor-pointer"
+                onClick={() => alert("Formularz logowania (placeholder)")}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="w-5 h-5"
-                >
-                  <path d="M22.675 0H1.325C.593 0 0 .593 0 1.326v21.348C0 23.407.593 24 1.325 24h11.495v-9.294H9.691v-3.622h3.129V8.413c0-3.1 1.894-4.788 4.659-4.788 1.325 0 2.464.099 2.797.143v3.24l-1.918.001c-1.504 0-1.794.715-1.794 1.763v2.311h3.587l-.467 3.622h-3.12V24h6.116C23.407 24 24 23.407 24 22.674V1.326C24 .593 23.407 0 22.675 0z" />
-                </svg>
-                <span>Zaloguj się przez Facebook</span>
-              </a>
-              <a
-                href="/login-email"
-                className="text-[#339FB8] font-medium hover:underline"
-              >
-                Zaloguj się przez email
-              </a>
+                Zaloguj się tradycyjnie
+              </button>
             </div>
-
-            <p className="text-sm">
-              Nie masz konta?{" "}
-              <a
-                href="/register"
-                className="text-[#339FB8] font-semibold hover:underline"
-              >
-                Zarejestruj się
-              </a>
-            </p>
           </div>
         </div>
       )}
