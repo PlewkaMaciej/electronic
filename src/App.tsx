@@ -8,16 +8,27 @@ import ProfileSettingsMain from "./ProfilSettingsMain";
 import LoginPage from "./LoginPage";
 import RegisterPage from "./RegisterPage";
 import ProductPage from "./ProductsPage";
+import MyAds from "./UserPanel/MyAds"
+import MyOrders from "./UserPanel/MyOrders";
+import Chat from "./UserPanel/Chat";
+import Favorites from "./UserPanel/Favorites";
 function App() {
   return (
     <>
       <Routes>
         <Route element={<Layout />}>
+        
+        <Route path="/Profile" element={<ProfileSettingsMain />} />
           <Route path="/Product/:id" element={<ProductPage />} />
           <Route path="/offerSearch" element={<OfferSearch />} />
           <Route path="/" element={<Homepage />} />
           <Route path="/login-email" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/my-ads" element={<MyAds />} />
+          <Route path="/my-orders" element={<MyOrders />} />
+          <Route path="/chat" element={<Chat />} />
+          <Route path="/favorites" element={<Favorites />} />
+
           <Route
             path="/rectanglead"
             element={
@@ -31,7 +42,7 @@ function App() {
             }
           />
         </Route>
-        <Route path="/Profile" element={<ProfileSettingsMain />} />
+      
       </Routes>
     </>
   );

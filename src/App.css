@@ -177,3 +177,11 @@
 .bounce {
   animation: bounce 0.5s ease-in-out forwards;
 }
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE i Edge */
+  scrollbar-width: none;    /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;            /* Chrome, Safari */
+}
