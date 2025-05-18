@@ -15,7 +15,7 @@ const ProfileSettingsMain = () => {
   
   
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-xl border border-gray-300">
+    <div className="mt-6 max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-xl border border-gray-300">
       <h2 className="text-2xl font-bold text-gray-800 mb-4">Ustawienia</h2>
       
       
