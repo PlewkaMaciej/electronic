@@ -1,12 +1,11 @@
 import { useLocation } from "react-router-dom";
-import komp from "../../client/img/komp.jpg";
+// import komp from "../../client/img/komp.jpg";
 
 import ComputerFilters, {
   filterComputerOffers,
   Offer as ComputerOffer,
   useComputerFilters,
-} from "../../client/component/offerSearchComponent/ComputerFilters";
-
+} from "../component/offerSearchComponent/ComputerFilters";
 const MOCK_OFFERS = [
   {
     id: 1,

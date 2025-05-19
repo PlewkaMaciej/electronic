@@ -1,26 +1,9 @@
-import React, { useState } from "react";
+import React from "react";
 
 import UserPanelNav from "./Items/UserPanelNav";
-import RectangleAd from "../../component/Items/RectangleAd";
-const Favorites = () => {
-  const userLinks = [
-    { label: "Moje ogłoszenia", href: "/my-ads" },
-    { label: "Moje zamówienia", href: "/my-orders" },
-    { label: "Czat", href: "/chat" },
-    { label: "Obserwowane", href: "/favorites" },
-    { label: "Portfel", href: "/wallet" },
-    { label: "Powiadomienia", href: "/notifications" },
-    { label: "Pomoc", href: "/help" },
-  ];
+import Announcement from "../../component/Items/Announcement";
 
-  const userAdsLinks = [
-    { label: "Aktywne", href: "/my-ads?active" },
-    { label: "Oczekujące", href: "/my-ads?pending" },
-    { label: "Robocze", href: "/my-ads?inWork" },
-    { label: "Obserwowane", href: "/my-ads?suspended" },
-    { label: "Portfel", href: "/my-ads?private" },
-    { label: "Powiadomienia", href: "/my-ads?ended" },
-  ];
+const Favorites = () => {
   const ads = [
     {
       imageSrc: "/images/car1.jpg",
@@ -37,23 +20,26 @@ const Favorites = () => {
       price: "6500",
     },
   ];
+
   return (
-    <>
-      <UserPanelNav items={userLinks}  matchBy="path"/>
-      <UserPanelNav items={userAdsLinks} matchBy="search" />
-      <div className="space-y-6 p-6 lg:flex justify-center flex-wrap gap-3"  >
-      {ads.map((ad, idx) => (
-        <RectangleAd
-          key={idx}
-          imageSrc={ad.imageSrc}
-          name={ad.name}
-          dateAdded={ad.dateAdded}
-          specification={ad.specification}
-          price={ad.price}
-        />
-      ))}
+    <div className="flex flex-col lg:flex-row max-w-7xl mx-auto px-4 gap-6">
+      {/* Nawigacja po lewej */}
+      <div className="w-full lg:w-1/4">
+        <UserPanelNav />
+      </div>
+
+      {/* Lista ulubionych ogłoszeń po prawej */}
+      <div className="w-full lg:w-3/4 space-y-6 p-4">
+        {ads.map((ad, idx) => (
+          <Announcement
+            key={idx}
+            imageSrc={ad.imageSrc}
+            name={ad.name}
+            specification={ad.specification}
+          />
+        ))}
+      </div>
     </div>
-    </>
   );
 };
 
