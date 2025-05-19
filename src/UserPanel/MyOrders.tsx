@@ -1,23 +1,8 @@
-import React, { useState } from "react";
-
+import React from "react";
 import UserPanelNav from "./Items/UserPanelNav";
-import RectangleAd from "../../component/Items/RectangleAd";
-const MyOrders = () => {
-  const userLinks = [
-    { label: "Moje ogłoszenia", href: "/my-ads" },
-    { label: "Moje zamówienia", href: "/my-orders" },
-    { label: "Czat", href: "/chat" },
-    { label: "Obserwowane", href: "/favorites" },
-    { label: "Portfel", href: "/wallet" },
-    { label: "Powiadomienia", href: "/notifications" },
-    { label: "Pomoc", href: "/help" },
-  ];
+import Announcement from "../../component/Items/Announcement";
 
-  const userAdsLinks = [
-    { label: "Aktywne", href: "/my-orders?active" },
-    { label: "Oczekujące", href: "/my-orders?canceled" },
-    { label: "Robocze", href: "/my-ads?completed" },
-  ];
+const MyOrders = () => {
   const ads = [
     {
       imageSrc: "/images/car1.jpg",
@@ -34,23 +19,26 @@ const MyOrders = () => {
       price: "6500",
     },
   ];
+
   return (
-    <>
-      <UserPanelNav items={userLinks} matchBy="path" />
-      <UserPanelNav items={userAdsLinks} matchBy="search"/>
-      <div className="space-y-6 p-6 lg:flex justify-center flex-wrap gap-3"  >
-      {ads.map((ad, idx) => (
-        <RectangleAd
-          key={idx}
-          imageSrc={ad.imageSrc}
-          name={ad.name}
-          dateAdded={ad.dateAdded}
-          specification={ad.specification}
-          price={ad.price}
-        />
-      ))}
+    <div className="flex flex-col lg:flex-row max-w-7xl mx-auto px-4 gap-6">
+      {/* Nawigacja po lewej */}
+      <div className="w-full lg:w-1/4">
+        <UserPanelNav />
+      </div>
+
+      {/* Zamówienia po prawej */}
+      <div className="w-full lg:w-3/4 space-y-6 p-4 flex gap-3">
+        {ads.map((ad, idx) => (
+          <Announcement
+            key={idx}
+            imageSrc={ad.imageSrc}
+            name={ad.name}
+            specification={ad.specification}
+          />
+        ))}
+      </div>
     </div>
-    </>
   );
 };
 
