@@ -74,7 +74,6 @@ const ProductPage: React.FC = () => {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      {/* mobile header */}
       <div className="block lg:hidden mb-6">
         <h1 className="text-xl font-bold text-gray-800 mb-2">{product.name}</h1>
         <p className="text-lg font-semibold text-[#006F91] mb-4">
@@ -94,7 +93,6 @@ const ProductPage: React.FC = () => {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6 border border-gray-200 p-6 rounded-2xl shadow-xl bg-white">
-        {/* left column */}
         <div className="relative flex flex-col items-center bg-white rounded-lg p-4 max-w-md mx-auto lg:max-w-full lg:w-[70%]">
           <div className="bg-gray-50 p-4 rounded-lg shadow-sm mb-6">
             <img
@@ -139,7 +137,6 @@ const ProductPage: React.FC = () => {
             </div>
           </div>
 
-          {/* product description */}
           <div className="mt-6 w-full bg-gray-50 p-4 rounded-lg shadow-sm flex-1">
             <h2 className="text-lg font-semibold text-gray-800 mb-2">
               <b>OPIS PRODUKTU</b>
@@ -147,7 +144,6 @@ const ProductPage: React.FC = () => {
             <p className="text-sm text-gray-700">{product.description}</p>
           </div>
 
-          {/* specification section */}
           <div className="block lg:hidden space-y-6 mt-6 w-full">
             <div className="p-4 rounded-lg bg-gray-50 shadow-sm">
               <h3 className="text-lg font-semibold text-gray-800 mb-2">
@@ -190,7 +186,6 @@ const ProductPage: React.FC = () => {
           </div>
         </div>
 
-        {/* right column */}
         <div className="hidden lg:block lg:w-[30%] space-y-6">
           <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
             <h1 className="text-2xl font-bold text-gray-800 mb-2">
@@ -254,7 +249,6 @@ const ProductPage: React.FC = () => {
         </div>
       </div>
 
-      {/* modal */}
       {isPreviewOpen && (
         <div
           onClick={() => setIsPreviewOpen(false)}
@@ -274,7 +268,7 @@ const ProductPage: React.FC = () => {
               &times;
             </button>
           </div>
-          {/* small photos in modal */}
+
           <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
             {product.images.map((image, index) => (
               <img

@@ -2,42 +2,32 @@ import { useState } from "react";
 import { FilterSection } from "./FilterSection";
 
 export type Filters = {
-  processor: string[];
-  gpu: string[];
-  disk: string[];
-  ram: string[];
-  power: string[];
+  type: string[];
+  compatibility: string[];
   state: string[];
   priceMin: string;
   priceMax: string;
 };
 
-export type Offer = {
+export type PartsOffer = {
   id: number;
   name: string;
   category: string;
-  processor: string;
-  gpu: string;
-  ram: string;
-  disk: string;
-  power: string;
-  date: string;
-  price: number;
+  type: string;
+  compatibility: string;
   state: string;
+  price: number;
 };
 
 export const defaultFilters: Filters = {
-  processor: [],
-  gpu: [],
-  disk: [],
-  ram: [],
-  power: [],
+  type: [],
+  compatibility: [],
   state: [],
   priceMin: "",
   priceMax: "",
 };
 
-export function useFilters() {
+export function usePartsFilters() {
   const [filters, setFilters] = useState<Filters>(defaultFilters);
 
   const handleMultiSelect = (key: keyof Filters, value: string) => {
@@ -55,23 +45,20 @@ export function useFilters() {
   return { filters, setFilters, handleMultiSelect };
 }
 
-export function filterOffers(
-  offers: Offer[],
+export function filterPartsOffers(
+  offers: PartsOffer[],
   filters: Filters,
   category: string | null
-): Offer[] {
+): PartsOffer[] {
   const min = parseFloat(filters.priceMin) || 0;
   const max = parseFloat(filters.priceMax) || Infinity;
 
   return offers.filter((offer) => {
     return (
       offer.category === category &&
-      (filters.processor.length === 0 ||
-        filters.processor.includes(offer.processor)) &&
-      (filters.gpu.length === 0 || filters.gpu.includes(offer.gpu)) &&
-      (filters.disk.length === 0 || filters.disk.includes(offer.disk)) &&
-      (filters.ram.length === 0 || filters.ram.includes(offer.ram)) &&
-      (filters.power.length === 0 || filters.power.includes(offer.power)) &&
+      (filters.type.length === 0 || filters.type.includes(offer.type)) &&
+      (filters.compatibility.length === 0 ||
+        filters.compatibility.includes(offer.compatibility)) &&
       (filters.state.length === 0 || filters.state.includes(offer.state)) &&
       offer.price >= min &&
       offer.price <= max
@@ -85,7 +72,7 @@ type Props = {
   setFilters: React.Dispatch<React.SetStateAction<Filters>>;
 };
 
-export default function ComputerFilters({
+export default function PartsFilters({
   filters,
   handleMultiSelect,
   setFilters,
@@ -93,50 +80,26 @@ export default function ComputerFilters({
   return (
     <>
       <FilterSection
-        title="Procesor"
-        options={["Intel", "AMD"]}
-        selected={filters.processor}
-        onToggle={(value) => handleMultiSelect("processor", value)}
-      />
-      <FilterSection
-        title="Karta graficzna"
+        title="Typ"
         options={[
-          "NVIDIA GeForce",
-          "AMD Radeon",
-          "NVIDIA Quadro",
-          "AMD Radeon Pro",
-          "Intel Arc",
+          "Karta graficzna",
+          "Procesor",
+          "Płyta główna",
+          "Pamięć RAM",
+          "Dysk",
         ]}
-        selected={filters.gpu}
-        onToggle={(value) => handleMultiSelect("gpu", value)}
+        selected={filters.type}
+        onToggle={(value) => handleMultiSelect("type", value)}
       />
       <FilterSection
-        title="Pamięć RAM"
-        options={["4 GB", "8 GB", "16 GB", "32 GB", "64 GB"]}
-        selected={filters.ram}
-        onToggle={(value) => handleMultiSelect("ram", value)}
-      />
-      <FilterSection
-        title="Moc zasilacza"
-        options={[
-          "Poniżej 500W",
-          "500 - 699W",
-          "700 - 999W",
-          "900 - 1200W",
-          "Powyżej 1200W",
-        ]}
-        selected={filters.power}
-        onToggle={(value) => handleMultiSelect("power", value)}
-      />
-      <FilterSection
-        title="Dysk"
-        options={["SSD M.2", "SSD SATA", "HDD"]}
-        selected={filters.disk}
-        onToggle={(value) => handleMultiSelect("disk", value)}
+        title="Kompatybilność"
+        options={["Intel", "AMD", "Uniwersalna"]}
+        selected={filters.compatibility}
+        onToggle={(value) => handleMultiSelect("compatibility", value)}
       />
       <FilterSection
         title="Stan"
-        options={["Nowy", "Używany"]}
+        options={["Nowy", "Używany", "Refurbished"]}
         selected={filters.state}
         onToggle={(value) => handleMultiSelect("state", value)}
       />
