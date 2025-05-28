@@ -1,7 +1,7 @@
 import React from "react";
 
 type OfferCardProps = {
-  offer: any; // Typ można rozbudować wg potrzeb
+  offer: any; // Można podmienić na konkretny typ `Offer` jeśli chcesz
   category: string | null;
   imageSrc: string;
 };
@@ -26,7 +26,12 @@ export function OfferCard({ offer, category, imageSrc }: OfferCardProps) {
         {category === "Komputery" && (
           <>
             <li>Procesor: {offer.processor}</li>
-            <li>GPU: {offer.gpu}</li>
+            <li>
+              GPU:{" "}
+              {offer.gpuBrand || offer.gpuModel
+                ? `${offer.gpuBrand ?? ""} ${offer.gpuModel ?? ""}`.trim()
+                : "Brak danych"}
+            </li>
             <li>RAM: {offer.ram}</li>
             <li>Dysk: {offer.disk}</li>
             <li>Zasilacz: {offer.power}</li>
@@ -36,7 +41,12 @@ export function OfferCard({ offer, category, imageSrc }: OfferCardProps) {
           <>
             <li>Marka: {offer.brand}</li>
             <li>Procesor: {offer.processor}</li>
-            <li>GPU: {offer.gpu}</li>
+            <li>
+              GPU:{" "}
+              {offer.gpuBrand || offer.gpuModel
+                ? `${offer.gpuBrand ?? ""} ${offer.gpuModel ?? ""}`.trim()
+                : "Brak danych"}
+            </li>
             <li>RAM: {offer.ram}</li>
             <li>Dysk: {offer.disk}</li>
             <li>Rozmiar ekranu: {offer.screenSize}</li>

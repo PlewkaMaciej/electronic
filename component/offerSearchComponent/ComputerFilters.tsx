@@ -3,7 +3,8 @@ import { FilterSection } from "./FilterSection";
 
 export type Filters = {
   processor: string[];
-  gpu: string[];
+  gpuBrand: string[];
+  gpuModel: string[];
   disk: string[];
   ram: string[];
   power: string[];
@@ -17,7 +18,8 @@ export type Offer = {
   name: string;
   category: string;
   processor: string;
-  gpu: string;
+  gpuBrand?: string;
+  gpuModel?: string;
   ram: string;
   disk: string;
   power: string;
@@ -28,7 +30,8 @@ export type Offer = {
 
 export const defaultFilters: Filters = {
   processor: [],
-  gpu: [],
+  gpuBrand: [],
+  gpuModel: [],
   disk: [],
   ram: [],
   power: [],
@@ -64,11 +67,37 @@ export function filterOffers(
   const max = parseFloat(filters.priceMax) || Infinity;
 
   return offers.filter((offer) => {
+    const gpuBrand = offer.gpuBrand || "";
+    const gpuModel = offer.gpuModel || "";
+
+    // Sprawdź, czy marka pasuje
+    const brandMatches =
+      filters.gpuBrand.length === 0 || filters.gpuBrand.includes(gpuBrand);
+
+    // Filtr modelu zależny od wybranych marek
+    const modelsForThisBrand = filters.gpuBrand.includes(gpuBrand)
+      ? filters.gpuModel.filter((model) => {
+          // tutaj zakładamy, że modele GPU nie są współdzielone między markami
+          return (
+            model &&
+            ((gpuBrand === "NVIDIA GeForce" && model.startsWith("RTX")) ||
+              (gpuBrand === "AMD Radeon" && model.startsWith("RX")) ||
+              (gpuBrand === "Intel Arc" && model.startsWith("A")))
+          );
+        })
+      : [];
+
+    const modelMatches =
+      filters.gpuModel.length === 0 ||
+      modelsForThisBrand.length === 0 ||
+      modelsForThisBrand.includes(gpuModel);
+
     return (
       offer.category === category &&
       (filters.processor.length === 0 ||
         filters.processor.includes(offer.processor)) &&
-      (filters.gpu.length === 0 || filters.gpu.includes(offer.gpu)) &&
+      brandMatches &&
+      modelMatches &&
       (filters.disk.length === 0 || filters.disk.includes(offer.disk)) &&
       (filters.ram.length === 0 || filters.ram.includes(offer.ram)) &&
       (filters.power.length === 0 || filters.power.includes(offer.power)) &&
@@ -90,6 +119,12 @@ export default function ComputerFilters({
   handleMultiSelect,
   setFilters,
 }: Props) {
+  const gpuModels = {
+    "NVIDIA GeForce": ["RTX 3080", "RTX 3070"],
+    "AMD Radeon": ["RX 6900 XT", "RX 6800 XT"],
+    "Intel Arc": ["A770", "A750"],
+  };
+
   return (
     <>
       <FilterSection
@@ -100,15 +135,16 @@ export default function ComputerFilters({
       />
       <FilterSection
         title="Karta graficzna"
-        options={[
-          "NVIDIA GeForce",
-          "AMD Radeon",
-          "NVIDIA Quadro",
-          "AMD Radeon Pro",
-          "Intel Arc",
-        ]}
-        selected={filters.gpu}
-        onToggle={(value) => handleMultiSelect("gpu", value)}
+        options={Object.keys(gpuModels)}
+        selected={filters.gpuBrand}
+        subSelected={filters.gpuModel}
+        onToggle={(value) => handleMultiSelect("gpuBrand", value)}
+        isExpandable={true}
+        subOptions={Object.entries(gpuModels).map(([brand, models]) => ({
+          brand,
+          models,
+        }))}
+        onSubToggle={(value) => handleMultiSelect("gpuModel", value)}
       />
       <FilterSection
         title="Pamięć RAM"
