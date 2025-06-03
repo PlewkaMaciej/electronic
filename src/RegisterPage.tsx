@@ -3,7 +3,9 @@ import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import StyleInput from "../component/Items/StyleInput";
 import { Mail, Lock, User } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useMutation, useQueryClient } from "react-query";
 
 const RegisterSchema = Yup.object().shape({
   firstName: Yup.string().required("Imię jest wymagane"),
@@ -20,9 +22,46 @@ const RegisterSchema = Yup.object().shape({
   agreement: Yup.boolean().oneOf([true], "Musisz zaakceptować zgodę"),
 });
 
+// funkcja mutująca: wysyła dane rejestracji na serwer
+const registerUser = async (userData: {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+}) => {
+  const response = await axios.post("/auth/register", userData);
+  return response.data;
+};
+
 const RegisterPage: React.FC = () => {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  // useMutation: wyciągamy mutate (doRegister), mutateAsync (doRegisterAsync), isLoading, isError, isSuccess, error, reset
+  const {
+    mutate: doRegister,
+    isLoading,
+    isError,
+    isSuccess,
+    error,
+    reset,
+  } = useMutation(registerUser, {
+    onSuccess: () => {
+      navigate("/login-email");
+    },
+    onError: (err: any) => {
+      console.error("Błąd rejestracji:", err);
+    },
+  });
+
+  // obsługa submitu przez mutate (callbackowa)
   const handleSubmit = (values: any) => {
-    console.log("Rejestracja:", values);
+    doRegister({
+      firstName: values.firstName,
+      lastName: values.lastName,
+      email: values.email,
+      password: values.password,
+    });
   };
 
   return (
@@ -41,11 +80,12 @@ const RegisterPage: React.FC = () => {
           agreement: false,
         }}
         validationSchema={RegisterSchema}
+        // tutaj możesz wybrać handleSubmit lub handleSubmitAsync
         onSubmit={handleSubmit}
         validateOnBlur
         validateOnChange
       >
-        {({ errors, touched, isSubmitting }) => (
+        {({ errors, touched }) => (
           <Form className="space-y-5">
             <Field
               name="firstName"
@@ -122,12 +162,25 @@ const RegisterPage: React.FC = () => {
               <p className="text-red-500 text-sm">{errors.agreement}</p>
             )}
 
+            {isError && (
+              <p className="text-red-500 text-center text-sm">
+                {(error as any)?.response?.data?.message ||
+                  "Coś poszło nie tak. Spróbuj ponownie."}
+              </p>
+            )}
+
+            {isSuccess && (
+              <p className="text-green-500 text-center text-sm">
+                Rejestracja przebiegła pomyślnie!
+              </p>
+            )}
+
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="w-full bg-[#339FB8] text-white py-3 rounded-lg shadow-md hover:bg-[#2b8fa6] transition-all duration-200 font-medium"
+              disabled={isLoading}
+              className="w-full bg-[#339FB8] text-white py-3 rounded-lg shadow-md hover:bg-[#2b8fa6] transition-all duration-200 font-medium disabled:opacity-60"
             >
-              {isSubmitting ? "Rejestrowanie..." : "Zarejestruj się"}
+              {isLoading ? "Rejestrowanie..." : "Zarejestruj się"}
             </button>
 
             <p className="text-center text-sm mt-2">
@@ -139,6 +192,17 @@ const RegisterPage: React.FC = () => {
                 Zaloguj się
               </Link>
             </p>
+
+            {/* Przycisk do resetu stanu mutacji (np. żeby ukryć komunikaty) */}
+            {(isError || isSuccess) && (
+              <button
+                type="button"
+                onClick={() => reset()}
+                className="mt-4 w-full border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-100 transition duration-150"
+              >
+                Resetuj status
+              </button>
+            )}
           </Form>
         )}
       </Formik>
