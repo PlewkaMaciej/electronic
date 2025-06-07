@@ -5,7 +5,7 @@ import StyleInput from "../component/Items/StyleInput";
 import { Mail, Lock, User } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useMutation, useQueryClient } from "react-query";
+import { useMutation } from "react-query";
 
 const RegisterSchema = Yup.object().shape({
   firstName: Yup.string().required("Imię jest wymagane"),
@@ -22,7 +22,6 @@ const RegisterSchema = Yup.object().shape({
   agreement: Yup.boolean().oneOf([true], "Musisz zaakceptować zgodę"),
 });
 
-// funkcja mutująca: wysyła dane rejestracji na serwer
 const registerUser = async (userData: {
   firstName: string;
   lastName: string;
@@ -35,9 +34,7 @@ const registerUser = async (userData: {
 
 const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
-  // useMutation: wyciągamy mutate (doRegister), mutateAsync (doRegisterAsync), isLoading, isError, isSuccess, error, reset
   const {
     mutate: doRegister,
     isLoading,
@@ -54,7 +51,6 @@ const RegisterPage: React.FC = () => {
     },
   });
 
-  // obsługa submitu przez mutate (callbackowa)
   const handleSubmit = (values: any) => {
     doRegister({
       firstName: values.firstName,
@@ -80,7 +76,6 @@ const RegisterPage: React.FC = () => {
           agreement: false,
         }}
         validationSchema={RegisterSchema}
-        // tutaj możesz wybrać handleSubmit lub handleSubmitAsync
         onSubmit={handleSubmit}
         validateOnBlur
         validateOnChange
@@ -193,7 +188,6 @@ const RegisterPage: React.FC = () => {
               </Link>
             </p>
 
-            {/* Przycisk do resetu stanu mutacji (np. żeby ukryć komunikaty) */}
             {(isError || isSuccess) && (
               <button
                 type="button"
