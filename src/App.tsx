@@ -13,6 +13,7 @@ import MyOrders from "./UserPanel/MyOrders";
 import Chat from "./UserPanel/Chat";
 import Favorites from "./UserPanel/Favorites";
 import AddnewAnn from "./AddnewAnn";
+import UpdateAccount from "./UserPanel/UpdateAccount";
 function App() {
   return (
     <>
@@ -30,6 +31,7 @@ function App() {
           <Route path="/chat" element={<Chat />} />
           <Route path="/favorites" element={<Favorites />} />
           <Route path="/addNewAnn" element={<AddnewAnn />} />
+           <Route path="/updateAccount" element={<UpdateAccount />} />
 
           <Route
             path="/rectanglead"
