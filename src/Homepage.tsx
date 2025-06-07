@@ -1,7 +1,22 @@
-import React from "react";
+// src/Homepage.tsx
+import React, { useEffect } from "react";
 import Carousel from "../component/Items/Carousel";
+import { useSelector } from "react-redux";
+import type { RootState } from "./store";
 
 const Homepage: React.FC = () => {
+  // 1) Odczyt tokenu z localStorage
+  const token = localStorage.getItem("accessToken");
+
+  // 2) Pobranie usera ze stanu Redux
+  const user = useSelector((state: RootState) => state.auth.user);
+
+  // 3) Logowanie w konsoli
+  useEffect(() => {
+    console.log("🔑 JWT token:", token);
+    console.log("👤 Redux user:", user);
+  }, [token, user]);
+
   const trustedSellers = Array.from({ length: 10 }, (_, index) => ({
     name: `Sprzedawca ${index + 1}`,
     specification: `Specyfikacja produktu ${index + 1}`,

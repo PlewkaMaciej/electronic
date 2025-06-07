@@ -1,11 +1,14 @@
+// src/LoginPage.tsx
 import React from "react";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import StyleInput from "../component/Items/StyleInput";
 import { Mail, Lock } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
-import { useMutation } from "react-query";
+
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "./store";
+import { loginUser, fetchCurrentUser } from "./store/slices/authSlice";
 
 interface LoginValues {
   email: string;
@@ -21,39 +24,19 @@ const LoginSchema = Yup.object().shape({
     .required("Hasło jest wymagane"),
 });
 
-const loginUser = async (userData: LoginValues) => {
-  const response = await axios.post("/auth/login", userData);
-  return response.data;
-};
-
 const LoginPage: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
-  const {
-    mutate: doLogin,
-    isLoading,
-    isError,
-    isSuccess,
-    error,
-    reset,
-  } = useMutation(loginUser, {
-    onSuccess: (data) => {
-      const { token } = data;
+  const { isLoading, error } = useSelector((state: RootState) => state.auth);
 
-      localStorage.setItem("accessToken", token);
+  const handleSubmit = async (values: LoginValues) => {
+    const result = await dispatch(loginUser(values));
+    if (loginUser.fulfilled.match(result)) {
+      await dispatch(fetchCurrentUser());
 
       navigate("/");
-    },
-    onError: (err: any) => {
-      console.error("Błąd logowania:", err);
-    },
-  });
-
-  const handleSubmit = (values: LoginValues) => {
-    doLogin({
-      email: values.email,
-      password: values.password,
-    });
+    }
   };
 
   return (
@@ -93,17 +76,8 @@ const LoginPage: React.FC = () => {
               className="bg-white"
             />
 
-            {isError && (
-              <p className="text-red-500 text-center text-sm">
-                {(error as any)?.response?.data?.error ||
-                  "Nieprawidłowy email lub hasło"}
-              </p>
-            )}
-
-            {isSuccess && (
-              <p className="text-green-500 text-center text-sm">
-                Logowanie zakończone sukcesem. Przekierowuję…
-              </p>
+            {error && (
+              <p className="text-red-500 text-center text-sm">{error}</p>
             )}
 
             <button
@@ -123,16 +97,6 @@ const LoginPage: React.FC = () => {
                 Zarejestruj się
               </Link>
             </p>
-
-            {(isError || isSuccess) && (
-              <button
-                type="button"
-                onClick={() => reset()}
-                className="mt-4 w-full border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-100 transition duration-150"
-              >
-                Resetuj status
-              </button>
-            )}
           </Form>
         )}
       </Formik>
