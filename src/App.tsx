@@ -24,12 +24,18 @@ function App() {
   const dispatch = useDispatch<AppDispatch>();
   const { user, isLoading } = useSelector((state: RootState) => state.auth);
 
+  // Za każdym razem, gdy zmieni się token w localStorage, spróbuj pobrać current user
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (token) {
       dispatch(fetchCurrentUser());
     }
-  }, [dispatch]);
+  }, [
+    dispatch,
+    /* dodatkowo reagujemy na zmianę tokenu: */ localStorage.getItem(
+      "accessToken"
+    ),
+  ]);
 
   if (isLoading) {
     return <div className="text-center mt-10">Ładowanie…</div>;
