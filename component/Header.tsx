@@ -5,6 +5,9 @@ import { useNavigate } from "react-router-dom";
 import MobileSearch from "./Header/MobileSearch";
 import AccountMenu, { MenuItem } from "./Header/AccountMenu";
 import Navigation from "./Header/Navigation";
+import { useSelector, useDispatch } from "react-redux";
+import type { RootState } from "../src/store";
+import { logout } from "../src/store/slices/authSlice";
 
 const menuItems: MenuItem[] = [
   { label: "Panel sterowania", href: "/dashboard", bold: true },
@@ -36,16 +39,17 @@ const categories = [
 ];
 
 const Header: React.FC = () => {
+  const [isLogged, setIsLogged] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState("");
   const [accountOpen, setAccountOpen] = useState(false);
   const navigate = useNavigate();
-
-  // Ref obejmujący przycisk i menu, żeby wykrywać kliknięcia poza oba te elementy
+  const dispatch = useDispatch();
+  const user = useSelector((state: RootState) => state.auth.user);
   const accountWrapperRef = useRef<HTMLDivElement>(null);
 
-  // Hook zamykający menu po kliknięciu poza przycisk i menu
   useEffect(() => {
+    setIsLogged(!!user);
     if (!accountOpen) return;
 
     function handleClickOutside(event: MouseEvent) {
@@ -59,7 +63,13 @@ const Header: React.FC = () => {
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [accountOpen]);
+  }, [accountOpen, user]);
+
+  const handleLogout = () => {
+    setAccountOpen(false);
+    setIsLogged(false);
+    dispatch(logout());
+  };
 
   const toggleMobile = () => setMobileOpen((prev) => !prev);
   const toggleAccount = () => setAccountOpen((prev) => !prev);
@@ -68,11 +78,6 @@ const Header: React.FC = () => {
     setActiveCategory(cat);
     navigate(`/offer-search?category=${encodeURIComponent(cat)}`);
     if (mobileOpen) toggleMobile();
-  };
-
-  const handleLogout = () => {
-    setAccountOpen(false);
-    alert("Wylogowano!");
   };
 
   return (
@@ -93,27 +98,44 @@ const Header: React.FC = () => {
       </div>
 
       {/* Desktop Header */}
-      <div className="hidden lg:flex items-center justify-between mx-auto max-w-7xl py-4">
-        <h1 className="text-3xl font-extrabold text-[#4A4A4A]">
-          Nazwa Aplikacji
-        </h1>
+      <div className="hidden lg:flex items-center justify-between gap-8 mx-auto max-w-7xl py-4">
+        <h1 className="text-3xl font-extrabold text-[#4A4A4A]">Nazwa Aplikacji</h1>
         <MobileSearch />
 
-        {/* Ważne! Ref obejmuje zarówno przycisk, jak i AccountMenu */}
-        <div className="relative" ref={accountWrapperRef}>
-          <button
-            onClick={toggleAccount}
-            className="px-6 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition"
-          >
-            Twoje konto
-          </button>
+        <div className="flex items-center gap-4 ml-auto">
+          <div className="relative" ref={accountWrapperRef}>
+            {isLogged ? (
+              <button
+                onClick={toggleAccount}
+                className="px-6 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition"
+              >
+                Twoje konto
+              </button>
+            ) : (
+              <a
+                href="/login-email"
+                className="px-6 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition"
+              >
+                Zaloguj się / Zarejestruj się
+              </a>
+            )}
 
-          <AccountMenu
-            items={menuItems}
-            visible={accountOpen}
-            toggleVisible={toggleAccount}
-            onLogout={handleLogout}
-          />
+            <AccountMenu
+              items={menuItems}
+              visible={accountOpen}
+              toggleVisible={toggleAccount}
+              onLogout={handleLogout}
+            />
+          </div>
+
+          {isLogged && (
+            <button
+              onClick={() => navigate("/sell")}
+              className="px-6 py-2 bg-[#339FB8] text-white rounded-lg hover:bg-[#2a8ba0] transition"
+            >
+              Sprzedaj
+            </button>
+          )}
         </div>
       </div>
 
@@ -131,20 +153,31 @@ const Header: React.FC = () => {
       {mobileOpen && (
         <div className="lg:hidden mt-4 bg-white shadow-lg rounded-xl p-4 space-y-3 mx-auto max-w-7xl">
           <button
-            onClick={() => navigate("/sell")}
-            className="w-full py-2 bg-[#4C6B8C] text-white rounded-lg"
+            onClick={() => isLogged && navigate("/sell")}
+            className={`w-full py-2 rounded-lg text-white ${
+              isLogged ? "bg-[#339FB8]" : "bg-gray-400 cursor-not-allowed"
+            }`}
+            disabled={!isLogged}
           >
             Sprzedaj
           </button>
 
-          {/* Tutaj też owijamy button i menu w ref */}
           <div className="relative" ref={accountWrapperRef}>
-            <button
-              onClick={toggleAccount}
-              className="w-full py-2 bg-gray-300 text-gray-800 rounded-lg"
-            >
-              Twoje konto
-            </button>
+            {isLogged ? (
+              <button
+                onClick={toggleAccount}
+                className="w-full px-6 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition"
+              >
+                Twoje konto
+              </button>
+            ) : (
+              <a
+                href="/login-email"
+                className="w-full block text-center px-6 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition"
+              >
+                Zaloguj się / Zarejestruj się
+              </a>
+            )}
 
             <AccountMenu
               items={menuItems}

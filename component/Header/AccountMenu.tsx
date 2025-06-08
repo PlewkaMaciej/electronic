@@ -1,5 +1,5 @@
 // src/components/Header/AccountMenu.tsx
-import React, { useRef, useEffect } from "react";
+import React from "react";
 
 export interface MenuItem {
   label: string;
@@ -11,7 +11,7 @@ interface AccountMenuProps {
   items: MenuItem[];
   visible: boolean;
   toggleVisible: () => void;
-  onLogout: () => void;
+  onLogout: () => void; // logout przekazany z zewnątrz
 }
 
 const AccountMenu: React.FC<AccountMenuProps> = ({
@@ -23,9 +23,7 @@ const AccountMenu: React.FC<AccountMenuProps> = ({
   if (!visible) return null;
 
   return (
-    <div
-      className="absolute left-0 top-full mt-2 w-56 bg-white border border-gray-300 rounded-lg shadow-lg z-50"
-    >
+    <div className="absolute left-0 top-full mt-2 w-56 bg-white border border-gray-300 rounded-lg shadow-lg z-50">
       <ul className="flex flex-col divide-y divide-gray-200">
         {items.map((item, idx) => (
           <li key={idx}>
