@@ -1,4 +1,3 @@
-// src/pages/UpdateAccount.tsx
 import React from "react";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
@@ -6,7 +5,7 @@ import StyleInput from "../../component/Items/StyleInput";
 import { Mail, Lock } from "lucide-react";
 import axios from "axios";
 import { useQuery, useMutation, useQueryClient } from "react-query";
-
+import { useNavigate } from "react-router";
 interface UpdateValues {
   email: string;
   currentPassword: string;
@@ -28,15 +27,14 @@ const fetchCurrentUser = async () => {
   const { data } = await axios.get("/auth/me", {
     headers: { Authorization: `Bearer ${token}` },
   });
-  return data.user; 
+  return data.user;
 };
 
 const updateAccount = async (values: UpdateValues) => {
   const token = localStorage.getItem("accessToken");
   const { data } = await axios.put(
-    "/auth/update-account",
+    "/auth/update-password", // ✅ Poprawiona ścieżka
     {
-      email: values.email,
       currentPassword: values.currentPassword,
       newPassword: values.newPassword,
     },
@@ -48,15 +46,15 @@ const updateAccount = async (values: UpdateValues) => {
 };
 
 const UpdateAccount: React.FC = () => {
+  const navigate=useNavigate()
   const queryClient = useQueryClient();
 
-  // 1) Pobranie aktualnego usera
-  const { data: user, isLoading: isFetching, isError: fetchError } = useQuery(
-    "currentUser",
-    fetchCurrentUser
-  );
+  const {
+    data: user,
+    isLoading: isFetching,
+    isError: fetchError,
+  } = useQuery("currentUser", fetchCurrentUser);
 
-  // 2) Mutacja do update
   const {
     mutate: doUpdate,
     isLoading: isUpdating,
@@ -66,15 +64,16 @@ const UpdateAccount: React.FC = () => {
     reset,
   } = useMutation(updateAccount, {
     onSuccess: () => {
-      // odśwież dane usera
       queryClient.invalidateQueries("currentUser");
+      navigate("/")
     },
   });
 
   if (isFetching) {
     return <p className="text-center mt-10">Ładowanie danych użytkownika…</p>;
   }
-  if (fetchError) {
+
+  if (fetchError || !user) {
     return (
       <p className="text-red-500 text-center mt-10">
         Nie udało się pobrać danych użytkownika.
@@ -96,7 +95,9 @@ const UpdateAccount: React.FC = () => {
           newPassword: "",
         }}
         validationSchema={UpdateSchema}
-        onSubmit={doUpdate}
+        onSubmit={(values) => {
+          doUpdate(values);
+        }}
       >
         {({ errors, touched }) => (
           <Form className="space-y-5">
@@ -106,6 +107,7 @@ const UpdateAccount: React.FC = () => {
               label="Email"
               type="email"
               icon={<Mail />}
+              disabled // Email nie jest aktualizowany w backendzie
               error={touched.email && errors.email ? errors.email : ""}
               success={touched.email && !errors.email}
               className="bg-white"
@@ -141,7 +143,7 @@ const UpdateAccount: React.FC = () => {
               className="bg-white"
             />
 
-            {(isError as boolean) && (
+            {isError && (
               <p className="text-red-500 text-center text-sm">
                 {(error as any)?.response?.data?.error ||
                   "Wystąpił błąd podczas aktualizacji."}
@@ -150,7 +152,7 @@ const UpdateAccount: React.FC = () => {
 
             {isSuccess && (
               <p className="text-green-500 text-center text-sm">
-                Dane zostały zaktualizowane pomyślnie.
+                Hasło zostało zaktualizowane pomyślnie.
               </p>
             )}
 

@@ -19,6 +19,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCurrentUser } from "./store/slices/authSlice";
 import type { AppDispatch, RootState } from "./store";
+import UpdateAccount from "./UserPanel/UpdateAccount";
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
@@ -55,6 +56,7 @@ function App() {
         />
         <Route path="/offer-search" element={<OfferSearch />} />
         <Route path="/Product/:id" element={<ProductPage />} />
+         <Route path="/updateAccount" element={<UpdateAccount />} />
         <Route
           path="/rectanglead"
           element={

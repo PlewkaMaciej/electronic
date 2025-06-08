@@ -66,7 +66,7 @@ const Header: React.FC = () => {
   }, [accountOpen, user]);
 
   const handleLogout = () => {
-    setAccountOpen(false);
+    setAccountOpen(true);
     setIsLogged(false);
     dispatch(logout());
   };
