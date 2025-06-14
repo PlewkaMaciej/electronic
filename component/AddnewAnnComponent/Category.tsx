@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+// src/component/AddnewAnnComponent/Category.tsx
+import React from "react";
+import { Field, useFormikContext } from "formik";
+import type { FormValues } from "../../src/AddnewAnn";
 
 const CategoryAnn: React.FC = () => {
-  const [category, setCategory] = useState("Laptop");
-  const [title, setTitle] = useState("");
+  const { values } = useFormikContext<FormValues>();
 
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6 max-w-6xl mx-auto mb-6">
@@ -19,19 +21,19 @@ const CategoryAnn: React.FC = () => {
           >
             Kategoria sprzętu
           </label>
-          <select
+          <Field
+            as="select"
             id="category"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
+            name="category"
             className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300"
           >
-            <option>Komputery</option>
-            <option>Laptop</option>
-            <option>Smartfon</option>
-            <option>Tablet</option>
-            <option>Monitor</option>
-            <option>Inne</option>
-          </select>
+            <option value="" disabled hidden>
+              Wybierz kategorię
+            </option>
+            <option value="Komputery stacjonarne">Komputery stacjonarne</option>
+            <option value="Telefony">Telefony</option>
+            {/* Dodaj kolejne kategorie jeśli trzeba */}
+          </Field>
         </div>
 
         {/* Tytuł ogłoszenia */}
@@ -42,11 +44,10 @@ const CategoryAnn: React.FC = () => {
           >
             Tytuł ogłoszenia
           </label>
-          <input
+          <Field
             id="title"
+            name="title"
             type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
             placeholder="Wpisz tytuł..."
             className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300"
           />
