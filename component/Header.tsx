@@ -1,12 +1,12 @@
 // src/components/Header/Header.tsx
 import React, { useState, useRef, useEffect } from "react";
 import { Menu, X } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import MobileSearch from "./Header/MobileSearch";
 import AccountMenu, { MenuItem } from "./Header/AccountMenu";
 import Navigation from "./Header/Navigation";
 import { useSelector, useDispatch } from "react-redux";
-import type { RootState } from "../src/store";
+import { RootState } from "../src/store";
 import { logout } from "../src/store/slices/authSlice";
 
 const menuItems: MenuItem[] = [
@@ -22,7 +22,7 @@ const menuItems: MenuItem[] = [
   { label: "Konto i bezpieczeństwo", href: "/account-security" },
   { label: "Wysyłka", href: "/shipping" },
   { label: "Prywatność", href: "/privacy" },
-  { label: "Sprzedawanie", href: "/selling" },
+  { label: "Sprzedawanie", href: "/addNewAnn" }, // zmienione
 ];
 
 const categories = [
@@ -48,6 +48,7 @@ const Header: React.FC = () => {
   const user = useSelector((state: RootState) => state.auth.user);
   const accountWrapperRef = useRef<HTMLDivElement>(null);
 
+  // obsługa kliknięcia poza menu
   useEffect(() => {
     setIsLogged(!!user);
     if (!accountOpen) return;
@@ -90,16 +91,18 @@ const Header: React.FC = () => {
           className="p-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
         >
           {mobileOpen ? (
-            <X className="w-6 h-6 text-gray-700" />
+            <X className="w-6 h-6" />
           ) : (
-            <Menu className="w-6 h-6 text-gray-700" />
+            <Menu className="w-6 h-6" />
           )}
         </button>
       </div>
 
       {/* Desktop Header */}
       <div className="hidden lg:flex items-center justify-between gap-8 mx-auto max-w-7xl py-4">
-        <h1 className="text-3xl font-extrabold text-[#4A4A4A]">Nazwa Aplikacji</h1>
+        <h1 className="text-3xl font-extrabold text-[#4A4A4A]">
+          Nazwa Aplikacji
+        </h1>
         <MobileSearch />
 
         <div className="flex items-center gap-4 ml-auto">
@@ -112,12 +115,12 @@ const Header: React.FC = () => {
                 Twoje konto
               </button>
             ) : (
-              <a
-                href="/login-email"
+              <Link
+                to="/login-email"
                 className="px-6 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition"
               >
                 Zaloguj się / Zarejestruj się
-              </a>
+              </Link>
             )}
 
             <AccountMenu
@@ -130,7 +133,7 @@ const Header: React.FC = () => {
 
           {isLogged && (
             <button
-              onClick={() => navigate("/sell")}
+              onClick={() => navigate("/addNewAnn")} // zmienione
               className="px-6 py-2 bg-[#339FB8] text-white rounded-lg hover:bg-[#2a8ba0] transition"
             >
               Sprzedaj
@@ -153,7 +156,7 @@ const Header: React.FC = () => {
       {mobileOpen && (
         <div className="lg:hidden mt-4 bg-white shadow-lg rounded-xl p-4 space-y-3 mx-auto max-w-7xl">
           <button
-            onClick={() => isLogged && navigate("/sell")}
+            onClick={() => isLogged && navigate("/addNewAnn")} // zmienione
             className={`w-full py-2 rounded-lg text-white ${
               isLogged ? "bg-[#339FB8]" : "bg-gray-400 cursor-not-allowed"
             }`}
@@ -171,12 +174,12 @@ const Header: React.FC = () => {
                 Twoje konto
               </button>
             ) : (
-              <a
-                href="/login-email"
+              <Link
+                to="/login-email"
                 className="w-full block text-center px-6 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition"
               >
                 Zaloguj się / Zarejestruj się
-              </a>
+              </Link>
             )}
 
             <AccountMenu

@@ -27,7 +27,7 @@ const AddnewAnn = () => {
       }}
     >
       {() => (
-        <Form>
+        <Form className="mt-5">
           <CategoryAnn />
           <Specification />
           <Description />

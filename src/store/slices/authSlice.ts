@@ -39,6 +39,10 @@ export const fetchCurrentUser = createAsyncThunk<
   { rejectValue: null }
 >("auth/fetchCurrentUser", async (_, { rejectWithValue }) => {
   try {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return rejectWithValue(null);
+
+    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     const response = await api.get("/auth/me");
     return response.data.user;
   } catch {
@@ -58,7 +62,6 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-
       .addCase(loginUser.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -69,16 +72,13 @@ const authSlice = createSlice({
           state.isLoading = false;
           state.user = action.payload.user;
           localStorage.setItem("accessToken", action.payload.token);
-          api.defaults.headers.common[
-            "Authorization"
-          ] = `Bearer ${action.payload.token}`;
+          api.defaults.headers.common["Authorization"] = `Bearer ${action.payload.token}`;
         }
       )
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
       })
-
       .addCase(fetchCurrentUser.pending, (state) => {
         state.isLoading = true;
         state.error = null;
