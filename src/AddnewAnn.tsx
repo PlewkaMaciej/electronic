@@ -7,7 +7,9 @@ import Prize from "../component/AddnewAnnComponent/Prize";
 import Shipment from "../component/AddnewAnnComponent/Shipment";
 import api from "./api/axios";
 import { useFormikContext } from "formik";
-import { useQuery } from "react-query";
+import { useQuery, useMutation } from "react-query";
+import { useNavigate } from "react-router-dom";
+
 export interface FormValues {
   category: string;
   title: string;
@@ -47,9 +49,7 @@ const AddnewAnn: React.FC = () => {
         pickup: false,
         shipping: false,
       }}
-      onSubmit={(values) => {
-        console.log("Wartości formularza:", values);
-      }}
+      onSubmit={() => {}}
     >
       {() => <InnerForm />}
     </Formik>
@@ -58,33 +58,49 @@ const AddnewAnn: React.FC = () => {
 
 const InnerForm: React.FC = () => {
   const { values, setFieldValue } = useFormikContext<FormValues>();
+  const navigate = useNavigate();
 
-  // React Query: pobierz specs gdy category jest ustawione
-  const {
-    data: fields,
-    isLoading,
-    isError,
-  } = useQuery(
+  // Pobieranie specyfikacji kategorii
+  const { data: fields, isLoading, isError } = useQuery(
     ["categorySpecs", values.category],
     () => fetchSpecs(values.category),
     {
       enabled: !!values.category,
       onSuccess: () => {
-        // resetuj poprzednie dane specyfikacji
         setFieldValue("specification", {});
       },
     }
   );
 
+  // Mutacja - tworzenie ogłoszenia
+  const { mutate, isLoading: isSubmitting, isError: isSubmitError } = useMutation({
+    mutationFn: async (newAnnouncement: FormValues) => {
+      const { data } = await api.post("/announcements/create", newAnnouncement);
+      return data;
+    },
+    onSuccess: () => {
+      // navigate("/moje-ogloszenia"); 
+      console.log("oh yea")
+    },
+  });
+
+  const handleFormSubmit = () => {
+    mutate(values);
+  };
+
   return (
-    <Form className="mt-5">
+    <Form
+      className="mt-5"
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleFormSubmit();
+      }}
+    >
       <CategoryAnn />
 
       {isLoading && <p className="text-center">Ładowanie specyfikacji…</p>}
       {isError && (
-        <p className="text-center text-red-500">
-          Błąd podczas pobierania specyfikacji.
-        </p>
+        <p className="text-center text-red-500">Błąd podczas pobierania specyfikacji.</p>
       )}
       {fields && <Specification fields={fields} />}
 
@@ -93,12 +109,19 @@ const InnerForm: React.FC = () => {
       <Prize />
       <Shipment />
 
+      {isSubmitError && (
+        <p className="text-center text-red-500 mt-4">Błąd podczas tworzenia ogłoszenia.</p>
+      )}
+
       <div className="max-w-6xl mx-auto text-right p-6">
         <button
           type="submit"
-          className="bg-blue-600 text-white px-6 py-2 rounded-xl shadow hover:bg-blue-700"
+          className={`px-6 py-2 rounded-xl shadow text-white ${
+            isSubmitting ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
+          }`}
+          disabled={isSubmitting}
         >
-          Zapisz ogłoszenie
+          {isSubmitting ? "Zapisywanie..." : "Zapisz ogłoszenie"}
         </button>
       </div>
     </Form>

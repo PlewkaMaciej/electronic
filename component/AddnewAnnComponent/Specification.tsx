@@ -1,7 +1,14 @@
-// src/component/AddnewAnnComponent/Specification.tsx
 import React from "react";
 import { useFormikContext, Field } from "formik";
-import { FieldDefinition } from "../../../api/src/models/CategorySpec";
+
+interface FieldDefinition {
+  key: string;
+  label: string;
+  type: "text" | "select" | "number" | "boolean";
+  options?: string[];
+  dependsOn?: string;
+  optionsMap?: Record<string, string[]>;
+}
 
 interface SpecProps {
   fields: FieldDefinition[];
@@ -13,15 +20,15 @@ interface FormValues {
 
 const Specification: React.FC<SpecProps> = ({ fields }) => {
   const { values, setFieldValue } = useFormikContext<FormValues>();
-  const spec = values.specification;
+  const spec = values.specification || {};
 
-  // Funkcja wyciągająca prefix przed pierwszą wielką literą
+  // Wyciąga prefix grupujący pola po kluczu
   const getGroup = (key: string) => {
     const match = key.match(/^[a-z]+/);
     return match ? match[0] : key;
   };
 
-  // Grupujemy fieldy
+  // Grupowanie pól po prefiksie
   const grouped: Record<string, FieldDefinition[]> = {};
   fields.forEach((f) => {
     const group = getGroup(f.key);
@@ -36,13 +43,9 @@ const Specification: React.FC<SpecProps> = ({ fields }) => {
         {Object.entries(grouped).map(([group, groupFields]) => (
           <div key={group} className="flex flex-wrap gap-6">
             {groupFields.map((f) => {
-              // ścieżka Formika
               const path = `specification.${f.key}`;
-              // bieżąca wartość
               const value = spec[f.key] ?? "";
-              // wartość, od której zależy to pole
               const depVal = f.dependsOn ? spec[f.dependsOn] : undefined;
-              // opcje select
               const options =
                 f.dependsOn && f.optionsMap
                   ? f.optionsMap[depVal] || []
@@ -50,13 +53,31 @@ const Specification: React.FC<SpecProps> = ({ fields }) => {
 
               const onChange = (e: React.ChangeEvent<any>) => {
                 setFieldValue(path, e.target.value);
-                // jeśli to pole nie ma dependsOn, wyczyść wszystkie jego dzieci
                 if (!f.dependsOn) {
-                  (fields.filter((c) => c.dependsOn === f.key) || []).forEach(
-                    (ch) => setFieldValue(`specification.${ch.key}`, "")
-                  );
+                  // Wyczyść zależne pola
+                  fields
+                    .filter((c) => c.dependsOn === f.key)
+                    .forEach((ch) => setFieldValue(`specification.${ch.key}`, ""));
                 }
               };
+
+              // Obsługa boolean jako checkbox (możesz zmienić na toggle jeśli chcesz)
+              if (f.type === "boolean") {
+                return (
+                  <div key={f.key} className="flex-1 min-w-[200px] flex items-center gap-2">
+                    <Field
+                      type="checkbox"
+                      name={path}
+                      checked={value === true}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setFieldValue(path, e.target.checked)
+                      }
+                      className="w-5 h-5 rounded"
+                    />
+                    <label className="text-sm font-medium text-gray-700">{f.label}</label>
+                  </div>
+                );
+              }
 
               return (
                 <div key={f.key} className="flex-1 min-w-[200px]">

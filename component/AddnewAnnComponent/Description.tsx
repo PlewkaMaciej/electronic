@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React from "react";
+import { useFormikContext } from "formik";
+import { FormValues } from "../../src/AddnewAnn"
 
 const Description: React.FC = () => {
-  const [description, setDescription] = useState("");
+  const { values, setFieldValue } = useFormikContext<FormValues>();
 
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6 max-w-6xl mx-auto mb-6">
@@ -13,8 +15,8 @@ const Description: React.FC = () => {
         </label>
         <textarea
           id="description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          value={values.description}
+          onChange={(e) => setFieldValue("description", e.target.value)}
           placeholder="Wprowadź szczegółowy opis sprzętu, stan, uwagi itd."
           rows={6}
           className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 resize-none"

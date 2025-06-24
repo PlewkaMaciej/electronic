@@ -1,9 +1,13 @@
-import React, { useState } from "react";
+import React from "react";
+import { useFormikContext } from "formik";
+import { FormValues } from "../../src/AddnewAnn";
 
 const Prize: React.FC = () => {
-  const [price, setPrice] = useState("");
-  const [minPrice, setMinPrice] = useState("");
-  const [negotiable, setNegotiable] = useState(false);
+  const { values, setFieldValue } = useFormikContext<FormValues>();
+
+  const handleNegotiableChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFieldValue("negotiable", e.target.checked);
+  };
 
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6 max-w-6xl mx-auto mb-6">
@@ -16,8 +20,8 @@ const Prize: React.FC = () => {
           <input
             type="number"
             placeholder="np. 2500"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
+            value={values.price}
+            onChange={(e) => setFieldValue("price", e.target.value)}
             className="p-2 border rounded-xl w-full"
           />
         </div>
@@ -34,31 +38,37 @@ const Prize: React.FC = () => {
         </div>
 
         {/* Przełącznik do negocjacji */}
-        <div className="flex items-center justify-between">
-          <label className="text-sm font-medium text-gray-700">Cena do negocjacji</label>
-          <button
-            onClick={() => setNegotiable(!negotiable)}
-            className={`w-12 h-6 flex items-center rounded-full p-1 duration-300 ease-in-out ${
-              negotiable ? "bg-green-500" : "bg-gray-300"
-            }`}
+        <div className="flex items-center justify-between relative">
+          <label
+            htmlFor="negotiable"
+            className="text-sm font-medium text-gray-700 cursor-pointer"
           >
-            <div
-              className={`bg-white w-4 h-4 rounded-full shadow-md transform duration-300 ease-in-out ${
-                negotiable ? "translate-x-6" : "translate-x-0"
-              }`}
-            ></div>
-          </button>
+            Cena do negocjacji
+          </label>
+          <input
+            id="negotiable"
+            type="checkbox"
+            checked={values.negotiable}
+            onChange={handleNegotiableChange}
+            className="w-12 h-6 appearance-none bg-gray-300 rounded-full relative cursor-pointer transition-colors duration-300 ease-in-out checked:bg-green-500"
+          />
+          {/* Kółko w przełączniku */}
+          <span
+            className={`absolute left-0 top-0 w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-300 ease-in-out pointer-events-none ${
+              values.negotiable ? "translate-x-6" : "translate-x-0"
+            }`}
+          />
         </div>
 
         {/* Cena minimalna */}
-        {negotiable && (
+        {values.negotiable && (
           <div>
             <label className="block font-medium mb-1 text-gray-700">Cena minimalna</label>
             <input
               type="number"
               placeholder="np. 2200"
-              value={minPrice}
-              onChange={(e) => setMinPrice(e.target.value)}
+              value={values.minPrice}
+              onChange={(e) => setFieldValue("minPrice", e.target.value)}
               className="p-2 border rounded-xl w-full"
             />
           </div>

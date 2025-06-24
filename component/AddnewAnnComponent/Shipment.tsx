@@ -1,8 +1,17 @@
-import React, { useState } from "react";
+import React from "react";
+import { useFormikContext } from "formik";
+import { FormValues } from "../../src/AddnewAnn";
 
 const Shipment: React.FC = () => {
-  const [pickup, setPickup] = useState(false);
-  const [shipping, setShipping] = useState(false);
+  const { values, setFieldValue } = useFormikContext<FormValues>();
+
+  const togglePickup = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFieldValue("pickup", e.target.checked);
+  };
+
+  const toggleShipping = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFieldValue("shipping", e.target.checked);
+  };
 
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6 max-w-6xl mx-auto mb-6">
@@ -10,37 +19,48 @@ const Shipment: React.FC = () => {
 
       <div className="space-y-6">
         {/* Odbiór osobisty */}
-        <div className="flex items-center justify-between">
-          <label className="text-sm font-medium text-gray-700">Odbiór osobisty</label>
-          <button
-            onClick={() => setPickup(!pickup)}
-            className={`w-12 h-6 flex items-center rounded-full p-1 duration-300 ease-in-out ${
-              pickup ? "bg-green-500" : "bg-gray-300"
-            }`}
+        <div className="flex items-center justify-between relative">
+          <label
+            htmlFor="pickup"
+            className="text-sm font-medium text-gray-700 cursor-pointer"
           >
-            <div
-              className={`bg-white w-4 h-4 rounded-full shadow-md transform duration-300 ease-in-out ${
-                pickup ? "translate-x-6" : "translate-x-0"
-              }`}
-            ></div>
-          </button>
+            Odbiór osobisty
+          </label>
+          <input
+            id="pickup"
+            type="checkbox"
+            checked={values.pickup}
+            onChange={togglePickup}
+            className="w-12 h-6 appearance-none bg-gray-300 rounded-full relative cursor-pointer transition-colors duration-300 ease-in-out checked:bg-green-500"
+          />
+          {/* Kółko w przełączniku */}
+          <span
+            className={`absolute left-0 top-0 w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-300 ease-in-out pointer-events-none ${
+              values.pickup ? "translate-x-6" : "translate-x-0"
+            }`}
+          />
         </div>
 
         {/* Wysyłka */}
-        <div className="flex items-center justify-between">
-          <label className="text-sm font-medium text-gray-700">Wysyłka</label>
-          <button
-            onClick={() => setShipping(!shipping)}
-            className={`w-12 h-6 flex items-center rounded-full p-1 duration-300 ease-in-out ${
-              shipping ? "bg-green-500" : "bg-gray-300"
-            }`}
+        <div className="flex items-center justify-between relative">
+          <label
+            htmlFor="shipping"
+            className="text-sm font-medium text-gray-700 cursor-pointer"
           >
-            <div
-              className={`bg-white w-4 h-4 rounded-full shadow-md transform duration-300 ease-in-out ${
-                shipping ? "translate-x-6" : "translate-x-0"
-              }`}
-            ></div>
-          </button>
+            Wysyłka
+          </label>
+          <input
+            id="shipping"
+            type="checkbox"
+            checked={values.shipping}
+            onChange={toggleShipping}
+            className="w-12 h-6 appearance-none bg-gray-300 rounded-full relative cursor-pointer transition-colors duration-300 ease-in-out checked:bg-green-500"
+          />
+          <span
+            className={`absolute left-0 top-0 w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-300 ease-in-out pointer-events-none ${
+              values.shipping ? "translate-x-6" : "translate-x-0"
+            }`}
+          />
         </div>
       </div>
     </div>
