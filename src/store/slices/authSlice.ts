@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import api from "../../api/axios";
 
 interface User {
-  id: string;
+  _id: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -72,7 +72,9 @@ const authSlice = createSlice({
           state.isLoading = false;
           state.user = action.payload.user;
           localStorage.setItem("accessToken", action.payload.token);
-          api.defaults.headers.common["Authorization"] = `Bearer ${action.payload.token}`;
+          api.defaults.headers.common[
+            "Authorization"
+          ] = `Bearer ${action.payload.token}`;
         }
       )
       .addCase(loginUser.rejected, (state, action) => {

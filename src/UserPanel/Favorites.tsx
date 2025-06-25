@@ -30,14 +30,14 @@ const Favorites = () => {
 
       {/* Lista ulubionych ogłoszeń po prawej */}
       <div className="w-full lg:w-3/4 space-y-6 p-4">
-        {ads.map((ad, idx) => (
+        {/* {ads.map((ad, idx) => (
           <Announcement
             key={idx}
             imageSrc={ad.imageSrc}
             name={ad.name}
             specification={ad.specification}
           />
-        ))}
+        ))} */}
       </div>
     </div>
   );
