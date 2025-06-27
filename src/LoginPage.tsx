@@ -1,4 +1,3 @@
-// src/LoginPage.tsx
 import React from "react";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
@@ -9,6 +8,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "./store";
 import { loginUser, fetchCurrentUser } from "./store/slices/authSlice";
+import { toast } from "react-toastify";
 
 interface LoginValues {
   email: string;
@@ -33,9 +33,11 @@ const LoginPage: React.FC = () => {
   const handleSubmit = async (values: LoginValues) => {
     const result = await dispatch(loginUser(values));
     if (loginUser.fulfilled.match(result)) {
+      toast.success("Zalogowano pomyślnie!");
       await dispatch(fetchCurrentUser());
-
       navigate("/");
+    } else {
+      toast.error("Nieprawidłowe dane logowania.");
     }
   };
 

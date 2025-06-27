@@ -6,6 +6,7 @@ import { Mail, Lock, User } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useMutation } from "react-query";
+import { toast } from "react-toastify";
 
 const RegisterSchema = Yup.object().shape({
   firstName: Yup.string().required("Imię jest wymagane"),
@@ -44,10 +45,14 @@ const RegisterPage: React.FC = () => {
     reset,
   } = useMutation(registerUser, {
     onSuccess: () => {
+      toast.success("Rejestracja przebiegła pomyślnie!");
       navigate("/login-email");
     },
     onError: (err: any) => {
-      console.error("Błąd rejestracji:", err);
+      toast.error(
+        err?.response?.data?.message ||
+          "Wystąpił błąd podczas rejestracji. Spróbuj ponownie."
+      );
     },
   });
 
@@ -157,19 +162,6 @@ const RegisterPage: React.FC = () => {
               <p className="text-red-500 text-sm">{errors.agreement}</p>
             )}
 
-            {isError && (
-              <p className="text-red-500 text-center text-sm">
-                {(error as any)?.response?.data?.message ||
-                  "Coś poszło nie tak. Spróbuj ponownie."}
-              </p>
-            )}
-
-            {isSuccess && (
-              <p className="text-green-500 text-center text-sm">
-                Rejestracja przebiegła pomyślnie!
-              </p>
-            )}
-
             <button
               type="submit"
               disabled={isLoading}
@@ -188,7 +180,7 @@ const RegisterPage: React.FC = () => {
               </Link>
             </p>
 
-            {(isError || isSuccess) && (
+            {isError || isSuccess ? (
               <button
                 type="button"
                 onClick={() => reset()}
@@ -196,7 +188,7 @@ const RegisterPage: React.FC = () => {
               >
                 Resetuj status
               </button>
-            )}
+            ) : null}
           </Form>
         )}
       </Formik>

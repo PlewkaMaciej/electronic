@@ -1,3 +1,4 @@
+// src/component/AddnewAnnComponent/Specification.tsx
 import React from "react";
 import { useFormikContext, Field } from "formik";
 
@@ -19,62 +20,63 @@ interface FormValues {
 }
 
 const Specification: React.FC<SpecProps> = ({ fields }) => {
-  const { values, setFieldValue } = useFormikContext<FormValues>();
+  const { values, setFieldValue, submitCount } = useFormikContext<FormValues>();
   const spec = values.specification || {};
 
-  // Wyciąga prefix grupujący pola po kluczu
+  // Grupowanie po prefiksie
   const getGroup = (key: string) => {
-    const match = key.match(/^[a-z]+/);
-    return match ? match[0] : key;
+    const m = key.match(/^[a-z]+/);
+    return m ? m[0] : key;
   };
-
-  // Grupowanie pól po prefiksie
   const grouped: Record<string, FieldDefinition[]> = {};
   fields.forEach((f) => {
-    const group = getGroup(f.key);
-    (grouped[group] ||= []).push(f);
+    const g = getGroup(f.key);
+    (grouped[g] ||= []).push(f);
   });
 
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6 max-w-6xl mx-auto mb-6">
       <h2 className="text-xl font-semibold mb-4 text-gray-800">Specyfikacja</h2>
-
       <div className="space-y-6">
         {Object.entries(grouped).map(([group, groupFields]) => (
           <div key={group} className="flex flex-wrap gap-6">
             {groupFields.map((f) => {
               const path = `specification.${f.key}`;
-              const value = spec[f.key] ?? "";
+              const val = spec[f.key] ?? "";
               const depVal = f.dependsOn ? spec[f.dependsOn] : undefined;
-              const options =
+              const opts =
                 f.dependsOn && f.optionsMap
                   ? f.optionsMap[depVal] || []
                   : f.options || [];
 
-              const onChange = (e: React.ChangeEvent<any>) => {
-                setFieldValue(path, e.target.value);
-                if (!f.dependsOn) {
-                  // Wyczyść zależne pola
-                  fields
-                    .filter((c) => c.dependsOn === f.key)
-                    .forEach((ch) => setFieldValue(`specification.${ch.key}`, ""));
-                }
-              };
+              // jeżeli submit i wartość pusta → błąd
+              const showError = submitCount > 0 && !val;
 
-              // Obsługa boolean jako checkbox (możesz zmienić na toggle jeśli chcesz)
+              const inputCls = `w-full p-3 border rounded-xl focus:outline-none focus:ring-2 ${
+                showError
+                  ? "border-red-500 ring-red-300"
+                  : "border-gray-300 ring-blue-300"
+              }`;
+
+              // checkboxy
               if (f.type === "boolean") {
                 return (
-                  <div key={f.key} className="flex-1 min-w-[200px] flex items-center gap-2">
+                  <div
+                    key={f.key}
+                    className="flex-1 min-w-[200px] flex items-center gap-2"
+                  >
                     <Field
                       type="checkbox"
                       name={path}
-                      checked={value === true}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      checked={val === true}
+                      onChange={(e: any) =>
                         setFieldValue(path, e.target.checked)
                       }
                       className="w-5 h-5 rounded"
                     />
-                    <label className="text-sm font-medium text-gray-700">{f.label}</label>
+                    <label className="text-sm font-medium text-gray-700">
+                      {f.label}
+                    </label>
                   </div>
                 );
               }
@@ -86,28 +88,48 @@ const Specification: React.FC<SpecProps> = ({ fields }) => {
                   </label>
 
                   {f.type === "select" ? (
-                    <select
-                      name={path}
-                      value={value}
-                      onChange={onChange}
-                      disabled={!!f.dependsOn && !depVal}
-                      className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300"
-                    >
-                      <option value="" disabled>
-                        Wybierz {f.label.toLowerCase()}
-                      </option>
-                      {options.map((opt) => (
-                        <option key={opt} value={opt}>
-                          {opt}
+                    <>
+                      <select
+                        name={path}
+                        value={val}
+                        onChange={(e) => {
+                          setFieldValue(path, e.target.value);
+                          if (!f.dependsOn) {
+                            // czyść zależne
+                            fields
+                              .filter((c) => c.dependsOn === f.key)
+                              .forEach((ch) =>
+                                setFieldValue(`specification.${ch.key}`, "")
+                              );
+                          }
+                        }}
+                        disabled={!!f.dependsOn && !depVal}
+                        className={inputCls}
+                      >
+                        <option value="" disabled>
+                          Wybierz {f.label.toLowerCase()}
                         </option>
-                      ))}
-                    </select>
+                        {opts.map((o) => (
+                          <option key={o} value={o}>
+                            {o}
+                          </option>
+                        ))}
+                      </select>
+                      {showError && (
+                        <p className="text-red-500 text-sm mt-1">
+                          To pole jest wymagane
+                        </p>
+                      )}
+                    </>
                   ) : (
-                    <Field
-                      name={path}
-                      type={f.type}
-                      className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300"
-                    />
+                    <>
+                      <Field name={path} type={f.type} className={inputCls} />
+                      {showError && (
+                        <p className="text-red-500 text-sm mt-1">
+                          To pole jest wymagane
+                        </p>
+                      )}
+                    </>
                   )}
                 </div>
               );

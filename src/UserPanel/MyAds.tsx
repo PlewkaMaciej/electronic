@@ -90,6 +90,7 @@ const MyAds: React.FC = () => {
               offer={ad}
               category={ad.category}
               imageSrc={computer}
+             
             />
           ))
         ) : (
