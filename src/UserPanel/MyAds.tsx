@@ -85,13 +85,7 @@ const MyAds: React.FC = () => {
       <div className="w-full lg:w-3/4 flex flex-wrap justify-start gap-6 mt-6 lg:mt-0 pl-4">
         {announcements && announcements.length > 0 ? (
           announcements.map((ad: any) => (
-            <Announcement
-              key={ad._id}
-              offer={ad}
-              category={ad.category}
-              imageSrc={computer}
-             
-            />
+            <Announcement key={ad._id} offer={ad} category={ad.category} />
           ))
         ) : (
           <div className="w-full flex justify-center items-center text-center text-xl text-gray-500 mt-8">

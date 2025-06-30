@@ -11,30 +11,26 @@ const formatDate = (date: string) => {
 interface AnnouncementProps {
   offer: any;
   category: string | null;
-  imageSrc: string;
 }
 
-const Announcement: React.FC<AnnouncementProps> = ({
-  offer,
-  category,
-  imageSrc,
-}) => {
+const Announcement: React.FC<AnnouncementProps> = ({ offer, category }) => {
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
-
     console.log("Like button clicked");
   };
 
   return (
     <div
-      className="bg-white mt-4 p-6 rounded-2xl shadow-lg hover:shadow-xl transition relative w-full sm:w-[45%] md:w-[70%] lg:w-[50%] xl:w-[34%] cursor-pointer"
+      className="bg-white mt-4 p-6 rounded-2xl shadow-lg hover:shadow-xl transition relative 
+                 w-full sm:w-[45%] md:w-[70%] lg:w-[50%] xl:w-[34%] cursor-pointer"
       onClick={() => console.log("Announcement clicked")}
     >
-      <div className="w-full h-[200px] bg-gray-100 rounded-lg overflow-hidden mb-4">
+      {/* kontener z proporcjami 4:3 */}
+      <div className="w-full aspect-w-4 aspect-h-3 bg-gray-100 rounded-lg overflow-hidden mb-4">
         <img
-          src={imageSrc || "https://via.placeholder.com/150"}
+          src={offer.images[0]}
           alt={offer.title}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain"
           loading="lazy"
         />
       </div>

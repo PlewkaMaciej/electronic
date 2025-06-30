@@ -4,10 +4,9 @@ import * as Yup from "yup";
 import StyleInput from "../component/Items/StyleInput";
 import { Mail, Lock } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "./store";
-import { loginUser, fetchCurrentUser } from "./store/slices/authSlice";
+import { loginUser } from "./store/slices/authSlice";
 import { toast } from "react-toastify";
 
 interface LoginValues {
@@ -27,32 +26,26 @@ const LoginSchema = Yup.object().shape({
 const LoginPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-
-  const { isLoading, error } = useSelector((state: RootState) => state.auth);
+  const { isLoading } = useSelector((state: RootState) => state.auth);
 
   const handleSubmit = async (values: LoginValues) => {
-    const result = await dispatch(loginUser(values));
-    if (loginUser.fulfilled.match(result)) {
+    try {
+      await dispatch(loginUser(values)).unwrap();
       toast.success("Zalogowano pomyślnie!");
-      await dispatch(fetchCurrentUser());
       navigate("/");
-    } else {
-      toast.error("Nieprawidłowe dane logowania.");
+    } catch (err: any) {
+      toast.error(err || "Nieprawidłowe dane logowania.");
     }
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 bg-gray-50 border border-gray-200 p-6 rounded-xl shadow-lg">
-      <h2 className="text-2xl font-bold text-[#2F4F4F] mb-6 text-center">
-        Zaloguj się
-      </h2>
+    <div className="max-w-md mx-auto mt-10 bg-gray-50 border p-6 rounded-xl shadow-lg">
+      <h2 className="text-2xl font-bold mb-6 text-center">Zaloguj się</h2>
 
       <Formik
         initialValues={{ email: "", password: "" }}
         validationSchema={LoginSchema}
         onSubmit={handleSubmit}
-        validateOnBlur
-        validateOnChange
       >
         {({ errors, touched }) => (
           <Form className="space-y-5">
@@ -64,7 +57,6 @@ const LoginPage: React.FC = () => {
               icon={<Mail />}
               error={touched.email && errors.email ? errors.email : ""}
               success={touched.email && !errors.email}
-              className="bg-white"
             />
 
             <Field
@@ -75,27 +67,19 @@ const LoginPage: React.FC = () => {
               icon={<Lock />}
               error={touched.password && errors.password ? errors.password : ""}
               success={touched.password && !errors.password}
-              className="bg-white"
             />
-
-            {error && (
-              <p className="text-red-500 text-center text-sm">{error}</p>
-            )}
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-[#339FB8] text-white py-3 rounded-lg shadow-md hover:bg-[#2b8fa6] transition-all duration-200 font-medium disabled:opacity-60"
+              className="w-full bg-[#339FB8] text-white py-3 rounded-lg hover:bg-[#2b8fa6] transition disabled:opacity-60"
             >
               {isLoading ? "Logowanie..." : "Zaloguj się"}
             </button>
 
             <p className="text-center text-sm mt-2">
               Nie masz konta?{" "}
-              <Link
-                to="/register"
-                className="text-[#339FB8] font-medium hover:underline"
-              >
+              <Link to="/register" className="text-[#339FB8] hover:underline">
                 Zarejestruj się
               </Link>
             </p>

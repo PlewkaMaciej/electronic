@@ -173,7 +173,7 @@ const RegisterPage: React.FC = () => {
             <p className="text-center text-sm mt-2">
               Masz już konto?{" "}
               <Link
-                to="/login-email"
+                to="/login"
                 className="text-[#339FB8] font-medium hover:underline"
               >
                 Zaloguj się

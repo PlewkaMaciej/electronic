@@ -1,10 +1,13 @@
+// src/AddnewAnn.tsx
 import React from "react";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
-import { useQuery, useMutation } from "react-query";
+import { useQuery, useMutation, useQueryClient } from "react-query";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
+import ImagesUpload from "../component/AddnewAnnComponent/Images";
 import CategoryAnn from "../component/AddnewAnnComponent/Category";
 import Specification from "../component/AddnewAnnComponent/Specification";
 import Description from "../component/AddnewAnnComponent/Description";
@@ -13,6 +16,7 @@ import Prize from "../component/AddnewAnnComponent/Prize";
 import Shipment from "../component/AddnewAnnComponent/Shipment";
 
 import api from "./api/axios";
+import type { RootState } from "./store";
 
 export interface FormValues {
   category: string;
@@ -27,6 +31,7 @@ export interface FormValues {
   minPrice: string;
   pickup: boolean;
   shipping: boolean;
+  images: File[];
 }
 
 function markNestedTouched(obj: any): any {
@@ -39,43 +44,31 @@ function markNestedTouched(obj: any): any {
 
 export const AddNewAnnSchema = Yup.object().shape({
   category: Yup.string().required("Kategoria jest wymagana"),
-
   title: Yup.string()
-    .min(5, "Tytuł musi mieć co najmniej 5 znaków")
+    .min(5, "Minimum 5 znaków")
     .required("Tytuł jest wymagany"),
-
   description: Yup.string()
-    .min(20, "Opis musi mieć co najmniej 20 znaków")
+    .min(20, "Minimum 20 znaków")
     .required("Opis jest wymagany"),
-
   offerType: Yup.string()
-    .required("Wybierz rodzaj ogłoszenia")
-    .oneOf(
-      ["Sprzedaż", "Wynajem", "Zamiana", "Usługa", "Inne"],
-      "Nieprawidłowy typ"
-    ),
-
+    .required("Wybierz typ ogłoszenia")
+    .oneOf(["Sprzedaż", "Wynajem", "Zamiana", "Usługa", "Inne"]),
   price: Yup.number()
     .typeError("Cena musi być liczbą")
-    .positive("Cena musi być większa niż 0")
+    .positive("Cena musi być większa od 0")
     .required("Cena jest wymagana"),
-
   negotiable: Yup.boolean(),
-
   minPrice: Yup.number()
     .typeError("Minimalna cena musi być liczbą")
-    .positive("Minimalna cena musi być większa niż 0")
+    .positive("Minimalna cena musi być większa od 0")
     .when("negotiable", {
       is: true,
-      then: (schema) =>
-        schema.required("Minimalna cena jest wymagana przy negocjacji"),
+      then: (schema) => schema.required("Podaj minimalną cenę"),
       otherwise: (schema) => schema.notRequired(),
     }),
-
   pickup: Yup.boolean(),
   shipping: Yup.boolean(),
-
-  // dynamic spec validation
+  images: Yup.array().min(1, "Dodaj co najmniej jedno zdjęcie"),
   specification: Yup.object().test(
     "all-required",
     "Wypełnij wszystkie wymagane pola specyfikacji",
@@ -86,11 +79,7 @@ export const AddNewAnnSchema = Yup.object().shape({
           message: "Wypełnij specyfikację",
         });
       }
-
-      // znajdź pierwsze puste pole
-      const empty = Object.entries(spec).find(
-        ([, v]) => v === "" || v === undefined || v === null
-      );
+      const empty = Object.entries(spec).find(([, v]) => v === "" || v == null);
       if (empty) {
         return this.createError({
           path: `specification.${empty[0]}`,
@@ -111,17 +100,35 @@ const fetchSpecs = async (category: string) => {
 
 const AddnewAnn: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const userId = useSelector((s: RootState) => s.auth.user?._id);
+
   const { mutate, isLoading: isSubmitting } = useMutation({
-    mutationFn: async (newAnnouncement: FormValues) => {
-      const { data } = await api.post("/announcements/create", newAnnouncement);
+    mutationFn: async (values: FormValues) => {
+      const formData = new FormData();
+      Object.entries(values).forEach(([key, val]) => {
+        if (key === "images") {
+          (val as File[]).forEach((file) => formData.append("images", file));
+        } else {
+          // specification to już obiekt, backend sobie JSON parse
+          formData.append(
+            key,
+            typeof val === "object" ? JSON.stringify(val) : String(val)
+          );
+        }
+      });
+      const { data } = await api.post("/announcements/create", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       return data;
     },
     onSuccess: () => {
-      toast.success("Ogłoszenie zostało dodane!");
+      toast.success("Ogłoszenie dodane!");
+      if (userId) queryClient.invalidateQueries(["userAnnouncements", userId]);
       navigate("/my-ads");
     },
     onError: () => {
-      toast.error("Błąd podczas tworzenia ogłoszenia.");
+      toast.error("Błąd podczas dodawania ogłoszenia.");
     },
   });
 
@@ -140,23 +147,22 @@ const AddnewAnn: React.FC = () => {
         minPrice: "",
         pickup: false,
         shipping: false,
+        images: [],
       }}
       validationSchema={AddNewAnnSchema}
-      validateOnBlur={false}
-      validateOnChange={false}
+      // włączamy domyślną walidację na change i blur
+      validateOnChange={true}
+      validateOnBlur={true}
       onSubmit={async (values, { setTouched, validateForm }) => {
         const errors = await validateForm();
         if (Object.keys(errors).length > 0) {
-          // oznacz wszystkie pola jako touched
-          const touchedFields: any = {};
-          Object.keys(errors).forEach((k) => (touchedFields[k] = true));
+          const touched: any = {};
+          Object.keys(errors).forEach((k) => (touched[k] = true));
           if (errors.specification) {
-            touchedFields.specification = markNestedTouched(
-              errors.specification
-            );
+            touched.specification = markNestedTouched(errors.specification);
           }
-          setTouched(touchedFields, false);
-          toast.error("Popraw błędy formularza przed zapisaniem.");
+          setTouched(touched, false);
+          toast.error("Popraw błędy przed zapisaniem.");
           return;
         }
         mutate(values);
@@ -184,23 +190,25 @@ const AddnewAnn: React.FC = () => {
             )}
             {isError && (
               <p className="text-center text-red-500">
-                Błąd podczas pobierania specyfikacji.
+                Błąd pobierania specyfikacji.
               </p>
             )}
             {fields && <Specification fields={fields} />}
+            <ImagesUpload />
             <Description />
             <Type />
             <Prize />
             <Shipment />
+
             <div className="max-w-6xl mx-auto text-right p-6">
               <button
                 type="submit"
+                disabled={isSubmitting}
                 className={`px-6 py-2 rounded-xl shadow text-white ${
                   isSubmitting ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
                 }`}
-                disabled={isSubmitting}
               >
-                {isSubmitting ? "Zapisywanie..." : "Zapisz ogłoszenie"}
+                {isSubmitting ? "Zapisywanie…" : "Zapisz ogłoszenie"}
               </button>
             </div>
           </Form>

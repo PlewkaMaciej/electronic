@@ -116,7 +116,7 @@ const Header: React.FC = () => {
               </button>
             ) : (
               <Link
-                to="/login-email"
+                to="/login"
                 className="px-6 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition"
               >
                 Zaloguj się / Zarejestruj się
@@ -175,7 +175,7 @@ const Header: React.FC = () => {
               </button>
             ) : (
               <Link
-                to="/login-email"
+                to="/login"
                 className="w-full block text-center px-6 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition"
               >
                 Zaloguj się / Zarejestruj się
