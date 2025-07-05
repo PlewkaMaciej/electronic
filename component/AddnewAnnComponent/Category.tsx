@@ -1,10 +1,9 @@
-// src/component/AddnewAnnComponent/Category.tsx
 import React from "react";
 import { Field, useFormikContext } from "formik";
 import type { FormValues } from "../../src/AddnewAnn";
 
 const CategoryAnn: React.FC = () => {
-  const { values } = useFormikContext<FormValues>();
+  const { values, errors, touched } = useFormikContext<FormValues>();
 
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6 max-w-6xl mx-auto mb-6">
@@ -25,7 +24,11 @@ const CategoryAnn: React.FC = () => {
             as="select"
             id="category"
             name="category"
-            className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300"
+            className={`w-full p-3 border rounded-xl focus:outline-none focus:ring-2 ${
+              errors.category && touched.category
+                ? "border-red-500 focus:ring-red-300"
+                : "border-gray-300 focus:ring-blue-300"
+            }`}
           >
             <option value="" disabled hidden>
               Wybierz kategorię
@@ -34,6 +37,9 @@ const CategoryAnn: React.FC = () => {
             <option value="Telefony">Telefony</option>
             {/* Dodaj kolejne kategorie jeśli trzeba */}
           </Field>
+          {touched.category && errors.category && (
+            <p className="text-red-500 text-sm mt-1">{errors.category}</p>
+          )}
         </div>
 
         {/* Tytuł ogłoszenia */}
@@ -49,8 +55,15 @@ const CategoryAnn: React.FC = () => {
             name="title"
             type="text"
             placeholder="Wpisz tytuł..."
-            className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300"
+            className={`w-full p-3 border rounded-xl focus:outline-none focus:ring-2 ${
+              errors.title && touched.title
+                ? "border-red-500 focus:ring-red-300"
+                : "border-gray-300 focus:ring-blue-300"
+            }`}
           />
+          {touched.title && errors.title && (
+            <p className="text-red-500 text-sm mt-1">{errors.title}</p>
+          )}
         </div>
       </div>
     </div>

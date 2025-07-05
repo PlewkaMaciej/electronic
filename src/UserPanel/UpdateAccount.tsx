@@ -6,6 +6,8 @@ import { Mail, Lock } from "lucide-react";
 import axios from "axios";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import { useNavigate } from "react-router";
+import { toast } from "react-toastify";
+
 interface UpdateValues {
   email: string;
   currentPassword: string;
@@ -33,7 +35,7 @@ const fetchCurrentUser = async () => {
 const updateAccount = async (values: UpdateValues) => {
   const token = localStorage.getItem("accessToken");
   const { data } = await axios.put(
-    "/auth/update-password", // ✅ Poprawiona ścieżka
+    "/auth/update-password",
     {
       currentPassword: values.currentPassword,
       newPassword: values.newPassword,
@@ -46,7 +48,7 @@ const updateAccount = async (values: UpdateValues) => {
 };
 
 const UpdateAccount: React.FC = () => {
-  const navigate=useNavigate()
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const {
@@ -64,8 +66,14 @@ const UpdateAccount: React.FC = () => {
     reset,
   } = useMutation(updateAccount, {
     onSuccess: () => {
+      toast.success("Hasło zostało zaktualizowane!");
       queryClient.invalidateQueries("currentUser");
-      navigate("/")
+      navigate("/");
+    },
+    onError: (err: any) => {
+      toast.error(
+        err?.response?.data?.error || "Błąd podczas aktualizacji hasła."
+      );
     },
   });
 
@@ -107,7 +115,7 @@ const UpdateAccount: React.FC = () => {
               label="Email"
               type="email"
               icon={<Mail />}
-              disabled // Email nie jest aktualizowany w backendzie
+              disabled
               error={touched.email && errors.email ? errors.email : ""}
               success={touched.email && !errors.email}
               className="bg-white"
@@ -142,19 +150,6 @@ const UpdateAccount: React.FC = () => {
               success={touched.newPassword && !errors.newPassword}
               className="bg-white"
             />
-
-            {isError && (
-              <p className="text-red-500 text-center text-sm">
-                {(error as any)?.response?.data?.error ||
-                  "Wystąpił błąd podczas aktualizacji."}
-              </p>
-            )}
-
-            {isSuccess && (
-              <p className="text-green-500 text-center text-sm">
-                Hasło zostało zaktualizowane pomyślnie.
-              </p>
-            )}
 
             <button
               type="submit"

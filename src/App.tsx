@@ -1,95 +1,127 @@
-import "./App.css";
-import { Routes, Route, Navigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "./store";
+import { fetchCurrentUser } from "./store/slices/authSlice";
+
 import Layout from "./Layout";
-import OfferSearch from "./OffersSearch";
-import RectangleAd from "../component/Items/RectangleAd";
 import Homepage from "./Homepage";
-import ProfileSettingsMain from "./ProfilSettingsMain";
+import OfferSearch from "./OffersSearch";
+import ProductPage from "./ProductsPage";
+
 import LoginPage from "./LoginPage";
 import RegisterPage from "./RegisterPage";
-import ProductPage from "./ProductsPage";
+
+import ProfileSettingsMain from "./ProfilSettingsMain";
 import MyAds from "./UserPanel/MyAds";
 import MyOrders from "./UserPanel/MyOrders";
 import Chat from "./UserPanel/Chat";
 import Favorites from "./UserPanel/Favorites";
-import AddnewAnn from "./AddnewAnn";
+import AddNewAnn from "./AddnewAnn";
 import UpdateAccount from "./UserPanel/UpdateAccount";
 
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchCurrentUser } from "./store/slices/authSlice";
-import type { AppDispatch, RootState } from "./store";
-
-function App() {
+import ProtectedRoute from "../component/protectRouter";
+import PublicRoute from "../component/PublicRoute";
+import { useState } from "react";
+export default function App() {
   const dispatch = useDispatch<AppDispatch>();
-  const { user, isLoading } = useSelector((state: RootState) => state.auth);
+  const { user, isLoading } = useSelector((s: RootState) => s.auth);
+  const [authChecked, setAuthChecked] = useState(false);
 
+  // Przy starcie aplikacji: jeśli jest token, fetchujemy usera.
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (token) {
-      dispatch(fetchCurrentUser());
+      dispatch(fetchCurrentUser()).finally(() => setAuthChecked(true));
+    } else {
+      setAuthChecked(true);
     }
   }, [dispatch]);
 
-  if (isLoading) {
+  // Nie renderujemy routingu, dopóki nie zweryfikujemy czy auth był potrzebny.
+  if (!authChecked || isLoading) {
     return <div className="text-center mt-10">Ładowanie…</div>;
   }
 
   return (
     <Routes>
       <Route element={<Layout />}>
-        <Route path="/" element={<Homepage />} />
+        {/** publiczne **/}
+        <Route index element={<Homepage />} />
+        <Route path="offer-search" element={<OfferSearch />} />
+        <Route path="product/:id" element={<ProductPage />} />
+
         <Route
-          path="/login-email"
-          element={user ? <Navigate to="/" /> : <LoginPage />}
-        />
-        <Route
-          path="/register"
-          element={user ? <Navigate to="/" /> : <RegisterPage />}
-        />
-        <Route path="/offer-search" element={<OfferSearch />} />
-        <Route path="/Product/:id" element={<ProductPage />} />
-        <Route path="/updateAccount" element={<UpdateAccount />} />
-        <Route
-          path="/rectanglead"
+          path="login"
           element={
-            <RectangleAd
-              imageSrc="https://www.example.com/ad-image.jpg"
-              name="Przykładowa nazwa ogłoszenia"
-              dateAdded="2025-03-09"
-              specification="Intel i7, 16GB RAM, 1TB SSD"
-              price="3500"
-            />
+            <PublicRoute>
+              <LoginPage />
+            </PublicRoute>
           }
         />
         <Route
-          path="/Profile"
-          element={user ? <ProfileSettingsMain /> : <Navigate to="/login-email" />}
+          path="register"
+          element={
+            <PublicRoute>
+              <RegisterPage />
+            </PublicRoute>
+          }
+        />
+        <Route path="update-account" element={<UpdateAccount />} />
+
+        {/** chronione **/}
+        <Route
+          path="profile"
+          element={
+            <ProtectedRoute>
+              <ProfileSettingsMain />
+            </ProtectedRoute>
+          }
         />
         <Route
-          path="/my-ads"
-          element={user ? <MyAds /> : <Navigate to="/login-email" />}
+          path="my-ads"
+          element={
+            <ProtectedRoute>
+              <MyAds />
+            </ProtectedRoute>
+          }
         />
         <Route
-          path="/my-orders"
-          element={user ? <MyOrders /> : <Navigate to="/login-email" />}
+          path="my-orders"
+          element={
+            <ProtectedRoute>
+              <MyOrders />
+            </ProtectedRoute>
+          }
         />
         <Route
-          path="/chat"
-          element={user ? <Chat /> : <Navigate to="/login-email" />}
+          path="chat"
+          element={
+            <ProtectedRoute>
+              <Chat />
+            </ProtectedRoute>
+          }
         />
         <Route
-          path="/favorites"
-          element={user ? <Favorites /> : <Navigate to="/login-email" />}
+          path="favorites"
+          element={
+            <ProtectedRoute>
+              <Favorites />
+            </ProtectedRoute>
+          }
         />
         <Route
-          path="/addNewAnn"
-          element={user ? <AddnewAnn /> : <Navigate to="/login-email" />}
+          path="addNewAnn"
+          element={
+            <ProtectedRoute>
+              <AddNewAnn />
+            </ProtectedRoute>
+          }
         />
+
+        {/** fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
   );
 }
-
-export default App;
