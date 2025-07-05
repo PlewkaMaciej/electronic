@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 const formatDate = (date: string) => {
   const dateObj = new Date(date);
@@ -19,16 +20,21 @@ const Announcement: React.FC<AnnouncementProps> = ({
   category,
   imageSrc,
 }) => {
+  const navigate = useNavigate();
+
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
-
     console.log("Like button clicked");
+  };
+
+  const handleRedirect = () => {
+    navigate(`/Product/${offer._id}`);
   };
 
   return (
     <div
       className="bg-white mt-4 p-6 rounded-2xl shadow-lg hover:shadow-xl transition relative w-full sm:w-[45%] md:w-[70%] lg:w-[50%] xl:w-[34%] cursor-pointer"
-      onClick={() => console.log("Announcement clicked")}
+      onClick={handleRedirect}
     >
       <div className="w-full h-[200px] bg-gray-100 rounded-lg overflow-hidden mb-4">
         <img

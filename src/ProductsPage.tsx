@@ -1,38 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useSwipeable } from "react-swipeable";
+import { useSingleAnnouncement } from "../hooks/useGetSingleAnn";
 
-const product = {
-  id: 218636377,
-  name: "Komputer do gier Ryzen 7 9800X3D, Radeon RX 6800 XT, 32GB RAM, 750W, M.2 2TB",
-  price: "5999,99 zł",
-  description:
-    "Na sprzedaż komputer do gier mojego syna. Młody się nie uczy, więc pora sprzedać mu kompa. Zakupiony na morele w 2023r. Używany po 6-7 godzin dziennie. Bez problemu odpali wszystkie nowe gry z tego roku i posłuży przez następne kilka lat bez problemu.",
-  sellerName: "Aleksander Richert",
-  sellerRating: 4.84,
-  sellerReviews: 121,
-  sellerJoinDate: "25.11.2024",
-  location: "Wejherowo, woj. Pomorskie",
-  images: [
-    "https://picsum.photos/400/300?random=1",
-    "https://picsum.photos/400/300?random=2",
-    "https://picsum.photos/400/300?random=3",
-    "https://picsum.photos/400/300?random=4",
-    "https://picsum.photos/400/300?random=5",
-  ],
-  specifications: [
-    "Procesor: AMD Ryzen 7 9800X3D",
-    "Karta graficzna: Radeon RX 6800 XT 16GB",
-    "RAM: 32GB DDR5",
-    "Zasilacz: 750W Platinum Plus",
-    "Dysk (1): M.2 2TB",
-    "Dysk (2): HDD 512GB",
-    "System operacyjny: Brak",
-  ],
-};
-
-const formatPrice = (price: string) => {
-  const [integerPart, decimalPart] = price.split(",");
+const formatPrice = (price: number) => {
+  const [integerPart, decimalPart] = price.toFixed(2).split(".");
   return (
     <span>
       {integerPart},<span className="text-sm">{decimalPart}</span> zł
@@ -41,25 +14,39 @@ const formatPrice = (price: string) => {
 };
 
 const ProductPage: React.FC = () => {
+  const { id } = useParams();
+  const { data: product, isLoading } = useSingleAnnouncement(id as string);
+
   const [currentImage, setCurrentImage] = useState(0);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [imageAnimation, setImageAnimation] = useState<string>("");
 
-  const handleImageChange = (direction: string) => {
+  // Tymczasowy zestaw zdjęć jeśli product.images nie istnieje
+  const images =
+    product?.images && product.images.length > 0
+      ? product.images
+      : [
+          "https://picsum.photos/400/300?random=1",
+          "https://picsum.photos/400/300?random=2",
+          "https://picsum.photos/400/300?random=3",
+        ];
+
+  const handleImageChange = (direction: "next" | "prev") => {
     if (direction === "next") {
       setImageAnimation("slideInFromRight");
-      setCurrentImage((prev) => (prev + 1) % product.images.length);
+      setCurrentImage((prev) => (prev + 1) % images.length);
     } else {
       setImageAnimation("slideInFromLeft");
-      setCurrentImage((prev) =>
-        prev === 0 ? product.images.length - 1 : prev - 1
-      );
+      setCurrentImage((prev) => (prev === 0 ? images.length - 1 : prev - 1));
     }
   };
 
   useEffect(() => {
-    setImageAnimation("");
-  }, [currentImage]);
+    if (imageAnimation) {
+      const timeout = setTimeout(() => setImageAnimation(""), 300);
+      return () => clearTimeout(timeout);
+    }
+  }, [currentImage, imageAnimation]);
 
   const swipeHandlers = useSwipeable({
     onSwipedLeft: () => handleImageChange("next"),
@@ -69,13 +56,29 @@ const ProductPage: React.FC = () => {
 
   const handleImageClick = (index: number, e: React.MouseEvent) => {
     e.stopPropagation();
+    if (index > currentImage) {
+      setImageAnimation("slideInFromRight");
+    } else if (index < currentImage) {
+      setImageAnimation("slideInFromLeft");
+    }
     setCurrentImage(index);
   };
 
+  if (isLoading || !product) {
+    return (
+      <div className="container mx-auto py-8 px-4 text-center">
+        <p>Ładowanie produktu...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto py-8 px-4">
+      {/* Mobile view header + buttons */}
       <div className="block lg:hidden mb-6">
-        <h1 className="text-xl font-bold text-gray-800 mb-2">{product.name}</h1>
+        <h1 className="text-xl font-bold text-gray-800 mb-2">
+          {product.title}
+        </h1>
         <p className="text-lg font-semibold text-[#006F91] mb-4">
           {formatPrice(product.price)}
         </p>
@@ -86,55 +89,58 @@ const ProductPage: React.FC = () => {
           <button className="bg-gray-200 text-gray-800 px-6 py-2 rounded-md shadow-md hover:bg-gray-300 transition-all duration-300 transform hover:scale-105">
             Zaproponuj cenę
           </button>
-          <button className="bg-gray-200 text-white px-6 py-2 rounded-md shadow-md hover:bg-gray-300 transition-all duration-300 transform hover:scale-105">
+          <button className="bg-gray-200 text-gray-800 px-6 py-2 rounded-md shadow-md hover:bg-gray-300 transition-all duration-300 transform hover:scale-105">
             Wyślij wiadomość
           </button>
         </div>
       </div>
 
+      {/* Main content layout */}
       <div className="flex flex-col lg:flex-row gap-6 border border-gray-200 p-6 rounded-2xl shadow-xl bg-white">
+        {/* Left side - images */}
         <div className="relative flex flex-col items-center bg-white rounded-lg p-4 max-w-md mx-auto lg:max-w-full lg:w-[70%]">
-          <div className="bg-gray-50 p-4 rounded-lg shadow-sm mb-6">
+          <div
+            {...swipeHandlers}
+            className="bg-gray-50 p-4 rounded-lg shadow-sm mb-6 cursor-pointer w-full"
+            onClick={() => setIsPreviewOpen(true)}
+          >
             <img
-              src={product.images[currentImage]}
-              alt={product.name}
-              className={`w-full h-[300px] md:h-[600px] object-cover rounded-xl shadow-md cursor-pointer transition-transform duration-500 ${imageAnimation} sm:w-full sm:h-[auto]`}
-              onClick={() => setIsPreviewOpen(true)}
+              src={images[currentImage]}
+              alt={`${product.title} - zdjęcie ${currentImage + 1}`}
+              className={`w-full h-[300px] md:h-[600px] object-cover rounded-xl shadow-md transition-transform duration-300 ${imageAnimation}`}
             />
           </div>
 
-          <div className="relative w-full mt-4">
-            <div className="flex items-center justify-center gap-4 w-full flex-wrap">
-              <button
-                onClick={() => handleImageChange("prev")}
-                className="hidden sm:flex bg-[#006F91] text-white p-2 rounded-full shadow-md hover:bg-[#00597A] transition-all duration-300 transform hover:scale-110"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
+          <div className="relative w-full mt-4 flex items-center justify-center gap-4 flex-wrap">
+            <button
+              onClick={() => handleImageChange("prev")}
+              className="hidden sm:flex bg-[#006F91] text-white p-2 rounded-full shadow-md hover:bg-[#00597A] transition-all duration-300 transform hover:scale-110"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
 
-              <div className="flex justify-center flex-wrap gap-4">
-                {product.images.map((image, index) => (
-                  <img
-                    key={index}
-                    src={image}
-                    alt={`Miniatura ${index + 1}`}
-                    onClick={(e) => handleImageClick(index, e)}
-                    className={`w-20 h-20 object-cover rounded-lg cursor-pointer transition-transform duration-300 transform ${
-                      currentImage === index
-                        ? "scale-110 border-2 border-[#006F91] opacity-90"
-                        : "opacity-50 hover:scale-105"
-                    }`}
-                  />
-                ))}
-              </div>
-
-              <button
-                onClick={() => handleImageChange("next")}
-                className="hidden sm:flex bg-[#006F91] text-white p-2 rounded-full shadow-md hover:bg-[#00597A] transition-all duration-300 transform hover:scale-110"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
+            <div className="flex justify-center flex-wrap gap-4">
+              {images.map((img: string, idx: number) => (
+                <img
+                  key={idx}
+                  src={img}
+                  alt={`Miniatura ${idx + 1}`}
+                  onClick={(e) => handleImageClick(idx, e)}
+                  className={`w-20 h-20 object-cover rounded-lg cursor-pointer transition-transform duration-300 transform ${
+                    currentImage === idx
+                      ? "scale-110 border-2 border-[#006F91] opacity-90"
+                      : "opacity-50 hover:scale-105"
+                  }`}
+                />
+              ))}
             </div>
+
+            <button
+              onClick={() => handleImageChange("next")}
+              className="hidden sm:flex bg-[#006F91] text-white p-2 rounded-full shadow-md hover:bg-[#00597A] transition-all duration-300 transform hover:scale-110"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
           </div>
 
           <div className="mt-6 w-full bg-gray-50 p-4 rounded-lg shadow-sm flex-1">
@@ -144,52 +150,31 @@ const ProductPage: React.FC = () => {
             <p className="text-sm text-gray-700">{product.description}</p>
           </div>
 
+          {/* Mobile view extra info */}
           <div className="block lg:hidden space-y-6 mt-6 w-full">
-            <div className="p-4 rounded-lg bg-gray-50 shadow-sm">
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                <b>INFORMACJE O SPRZEDAJĄCYM</b>
-              </h3>
-              <p className="text-sm text-gray-700">
-                Nazwa: <span className="font-bold">{product.sellerName}</span>
-              </p>
-              <p className="text-sm text-gray-700">
-                Ocena: <span className="font-bold">{product.sellerRating}</span>{" "}
-                ({product.sellerReviews} opinii)
-              </p>
-              <p className="text-sm text-gray-700">
-                Dołączył:{" "}
-                <span className="font-bold">{product.sellerJoinDate}</span>
-              </p>
-            </div>
-
-            <div className="p-4 rounded-lg bg-gray-50 shadow-sm">
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                <b>SPECYFIKACJA</b>
-              </h3>
-              <ul className="list-disc pl-5 text-sm text-gray-700">
-                {product.specifications.map((spec, index) => (
-                  <li key={index} className="font-bold">
-                    {spec}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="p-4 rounded-lg bg-gray-50 shadow-sm">
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                <b>LOKALIZACJA</b>
-              </h3>
-              <div className="w-full h-60 bg-gray-200 rounded-lg flex items-center justify-center text-gray-600 text-sm">
-                Mapka z lokalizacją (tu można podpiąć API)
+            {product.specification && (
+              <div className="p-4 rounded-lg bg-gray-50 shadow-sm">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  <b>SPECYFIKACJA</b>
+                </h3>
+                <ul className="list-disc pl-5 text-sm text-gray-700">
+                  {Object.entries(product.specification).map(([key, value]) => (
+                    <li key={key} className="font-bold">
+                      {key.charAt(0).toUpperCase() + key.slice(1)}:{" "}
+                      {String(value)}
+                    </li>
+                  ))}
+                </ul>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
+        {/* Right side - details and actions on desktop */}
         <div className="hidden lg:block lg:w-[30%] space-y-6">
           <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
             <h1 className="text-2xl font-bold text-gray-800 mb-2">
-              {product.name}
+              {product.title}
             </h1>
             <p className="text-xl font-semibold text-[#006F91] mb-4">
               {formatPrice(product.price)}
@@ -208,79 +193,75 @@ const ProductPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="p-4 rounded-lg bg-gray-50 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">
-              <b>INFORMACJE O SPRZEDAJĄCYM</b>
-            </h3>
-            <p className="text-sm text-gray-700">
-              Nazwa: <span className="font-bold">{product.sellerName}</span>
-            </p>
-            <p className="text-sm text-gray-700">
-              Ocena: <span className="font-bold">{product.sellerRating}</span> (
-              {product.sellerReviews} opinii)
-            </p>
-            <p className="text-sm text-gray-700">
-              Dołączył:{" "}
-              <span className="font-bold">{product.sellerJoinDate}</span>
-            </p>
-          </div>
-
-          <div className="p-4 rounded-lg bg-gray-50 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">
-              <b>SPECYFIKACJA</b>
-            </h3>
-            <ul className="list-disc pl-5 text-sm text-gray-700">
-              {product.specifications.map((spec, index) => (
-                <li key={index} className="font-bold">
-                  {spec}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="p-4 rounded-lg bg-gray-50 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">
-              <b>LOKALIZACJA</b>
-            </h3>
-            <div className="w-full h-60 bg-gray-200 rounded-lg flex items-center justify-center text-gray-600 text-sm">
-              Mapka z lokalizacją (tu można podpiąć API)
+          {product.specification && (
+            <div className="p-4 rounded-lg bg-gray-50 shadow-sm">
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                <b>SPECYFIKACJA</b>
+              </h3>
+              <ul className="list-disc pl-5 text-sm text-gray-700">
+                {Object.entries(product.specification).map(([key, value]) => (
+                  <li key={key} className="font-bold">
+                    {key.charAt(0).toUpperCase() + key.slice(1)}:{" "}
+                    {String(value)}
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
       {isPreviewOpen && (
         <div
           onClick={() => setIsPreviewOpen(false)}
-          className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center"
+          className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4"
           {...swipeHandlers}
         >
-          <div className="relative w-4/5 h-4/5 flex flex-col justify-center items-center">
+          <div
+            className="relative w-full max-w-3xl max-h-[80vh] flex flex-col justify-center items-center bg-gray-900 rounded-lg shadow-lg"
+            onClick={(e) => e.stopPropagation()} // żeby kliknięcie na obraz nie zamykało podglądu
+          >
             <img
-              src={product.images[currentImage]}
+              src={images[currentImage]}
               alt="Podgląd"
-              className="w-full h-[1000px] sm:h-[1000px] object-cover rounded-lg shadow-lg modal-image"
+              className="max-w-full max-h-[70vh] object-contain rounded-lg"
             />
             <button
               onClick={() => setIsPreviewOpen(false)}
-              className="absolute top-4 right-4 text-white text-3xl bg-black bg-opacity-50 px-3 py-1 rounded-full cursor-pointer"
+              className="absolute top-3 right-3 text-white bg-gray-800 bg-opacity-70 hover:bg-opacity-90 transition-all rounded-full w-10 h-10 flex items-center justify-center cursor-pointer shadow-md"
+              aria-label="Zamknij podgląd"
             >
-              &times;
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
             </button>
           </div>
 
           <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
-            {product.images.map((image, index) => (
+            {images.map((image: string, index: number) => (
               <img
                 key={index}
                 src={image}
                 alt={`Miniatura ${index + 1}`}
-                className={`w-16 h-16 object-cover rounded-lg cursor-pointer transition-transform duration-300 transform ${
+                className={`w-12 h-12 object-cover rounded-lg cursor-pointer transition-transform duration-300 transform ${
                   currentImage === index
                     ? "scale-110 border-2 border-[#006F91] opacity-90"
                     : "opacity-50 hover:scale-105"
                 }`}
-                onClick={(e) => handleImageClick(index, e)}
+                onClick={(e: React.MouseEvent<HTMLImageElement>) =>
+                  handleImageClick(index, e)
+                }
               />
             ))}
           </div>
