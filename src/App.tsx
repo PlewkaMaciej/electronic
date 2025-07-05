@@ -1,4 +1,3 @@
-// src/App.tsx
 import React, { useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -27,23 +26,18 @@ export default function App() {
   const { user, isLoading } = useSelector((s: RootState) => s.auth);
   const [initializing, setInitializing] = useState(true);
 
-  // Pobieramy aktualnego usera zaraz po starcie lub gdy token się zmieni
   const token = localStorage.getItem("accessToken");
   useEffect(() => {
     if (token) {
-      // unwrap() pozwala traktować thunk jak prawdziwe Promisy
       dispatch(fetchCurrentUser())
         .unwrap()
-        .catch(() => {
-          /* ignorujemy błąd, po prostu nie mamy usera */
-        })
+        .catch(() => {})
         .finally(() => setInitializing(false));
     } else {
       setInitializing(false);
     }
   }, [dispatch, token]);
 
-  // Pokaż loader dopóki trwa inicjalizacja albo wczytywanie auth
   if (initializing || isLoading) {
     return <div className="text-center mt-10">Ładowanie…</div>;
   }
@@ -51,7 +45,6 @@ export default function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
-        {/** publiczne **/}
         <Route index element={<Homepage />} />
         <Route path="offer-search" element={<OfferSearch />} />
         <Route path="product/:id" element={<ProductPage />} />
@@ -74,7 +67,6 @@ export default function App() {
         />
         <Route path="update-account" element={<UpdateAccount />} />
 
-        {/** chronione **/}
         <Route
           path="profile"
           element={
@@ -124,7 +116,6 @@ export default function App() {
           }
         />
 
-        {/* wszystko inne → home */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

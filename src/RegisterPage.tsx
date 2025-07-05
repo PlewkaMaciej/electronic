@@ -46,7 +46,7 @@ const RegisterPage: React.FC = () => {
   } = useMutation(registerUser, {
     onSuccess: () => {
       toast.success("Rejestracja przebiegła pomyślnie!");
-      navigate("/login-email");
+      navigate("/login");
     },
     onError: (err: any) => {
       toast.error(

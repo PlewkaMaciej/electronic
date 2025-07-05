@@ -13,7 +13,7 @@ const PublicRoute: React.FC<Props> = ({ children }) => {
   if (isLoading) {
     return <div className="text-center mt-10">Ładowanie…</div>;
   }
-  // jeśli już jesteś zalogowany, nie pokazuj login/register, tylko kieruj na home
+
   if (user) {
     return <Navigate to="/" replace />;
   }

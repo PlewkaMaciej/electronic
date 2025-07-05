@@ -15,7 +15,6 @@ const ProtectedRoute: React.FC<Props> = ({ children }) => {
     return <div className="text-center mt-10">Ładowanie…</div>;
   }
   if (!user) {
-    // jeśli nie zalogowany, przekieruj do /login i zachowaj ścieżkę w state
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
   return children;
