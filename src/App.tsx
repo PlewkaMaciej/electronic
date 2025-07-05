@@ -1,5 +1,6 @@
-import React, { useEffect } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+// src/App.tsx
+import React, { useEffect, useState } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "./store";
 import { fetchCurrentUser } from "./store/slices/authSlice";
@@ -8,10 +9,8 @@ import Layout from "./Layout";
 import Homepage from "./Homepage";
 import OfferSearch from "./OffersSearch";
 import ProductPage from "./ProductsPage";
-
 import LoginPage from "./LoginPage";
 import RegisterPage from "./RegisterPage";
-
 import ProfileSettingsMain from "./ProfilSettingsMain";
 import MyAds from "./UserPanel/MyAds";
 import MyOrders from "./UserPanel/MyOrders";
@@ -22,24 +21,30 @@ import UpdateAccount from "./UserPanel/UpdateAccount";
 
 import ProtectedRoute from "../component/protectRouter";
 import PublicRoute from "../component/PublicRoute";
-import { useState } from "react";
+
 export default function App() {
   const dispatch = useDispatch<AppDispatch>();
   const { user, isLoading } = useSelector((s: RootState) => s.auth);
-  const [authChecked, setAuthChecked] = useState(false);
+  const [initializing, setInitializing] = useState(true);
 
-  // Przy starcie aplikacji: jeśli jest token, fetchujemy usera.
+  // Pobieramy aktualnego usera zaraz po starcie lub gdy token się zmieni
+  const token = localStorage.getItem("accessToken");
   useEffect(() => {
-    const token = localStorage.getItem("accessToken");
     if (token) {
-      dispatch(fetchCurrentUser()).finally(() => setAuthChecked(true));
+      // unwrap() pozwala traktować thunk jak prawdziwe Promisy
+      dispatch(fetchCurrentUser())
+        .unwrap()
+        .catch(() => {
+          /* ignorujemy błąd, po prostu nie mamy usera */
+        })
+        .finally(() => setInitializing(false));
     } else {
-      setAuthChecked(true);
+      setInitializing(false);
     }
-  }, [dispatch]);
+  }, [dispatch, token]);
 
-  // Nie renderujemy routingu, dopóki nie zweryfikujemy czy auth był potrzebny.
-  if (!authChecked || isLoading) {
+  // Pokaż loader dopóki trwa inicjalizacja albo wczytywanie auth
+  if (initializing || isLoading) {
     return <div className="text-center mt-10">Ładowanie…</div>;
   }
 
@@ -119,7 +124,7 @@ export default function App() {
           }
         />
 
-        {/** fallback */}
+        {/* wszystko inne → home */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
