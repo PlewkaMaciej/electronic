@@ -21,7 +21,7 @@ const ProductPage: React.FC = () => {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [imageAnimation, setImageAnimation] = useState<string>("");
 
-  // Tymczasowy zestaw zdjęć jeśli product.images nie istnieje
+
   const images =
     product?.images && product.images.length > 0
       ? product.images
@@ -43,6 +43,7 @@ const ProductPage: React.FC = () => {
 
   useEffect(() => {
     if (imageAnimation) {
+     
       const timeout = setTimeout(() => setImageAnimation(""), 300);
       return () => clearTimeout(timeout);
     }
