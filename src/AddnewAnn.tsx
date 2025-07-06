@@ -7,14 +7,15 @@ import { useQuery, useMutation, useQueryClient } from "react-query";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-import ImagesUpload from "../component/AddnewAnnComponent/Images";
 import CategoryAnn from "../component/AddnewAnnComponent/Category";
 import Specification from "../component/AddnewAnnComponent/Specification";
+import ImagesUpload from "../component/AddnewAnnComponent/Images";
 import Description from "../component/AddnewAnnComponent/Description";
 import Type from "../component/AddnewAnnComponent/Type";
 import Prize from "../component/AddnewAnnComponent/Prize";
 import Shipment from "../component/AddnewAnnComponent/Shipment";
 
+import LocationPicker, { Location } from "./locationPicker/locationPicker";
 import api from "./api/axios";
 import type { RootState } from "./store";
 
@@ -24,14 +25,13 @@ export interface FormValues {
   specification: Record<string, any>;
   description: string;
   offerType: string;
-  pickupOnly: boolean;
-  onlineSale: boolean;
   price: string;
   negotiable: boolean;
   minPrice: string;
-  pickup: boolean;
-  shipping: boolean;
+  pickupOnly: boolean;
+  onlineSale: boolean;
   images: File[];
+  location: Location | null;
 }
 
 function markNestedTouched(obj: any): any {
@@ -55,20 +55,28 @@ export const AddNewAnnSchema = Yup.object().shape({
     .oneOf(["Sprzedaż", "Wynajem", "Zamiana", "Usługa", "Inne"]),
   price: Yup.number()
     .typeError("Cena musi być liczbą")
-    .positive("Cena musi być większa od 0")
+    .positive("Cena musi być > 0")
     .required("Cena jest wymagana"),
   negotiable: Yup.boolean(),
   minPrice: Yup.number()
     .typeError("Minimalna cena musi być liczbą")
-    .positive("Minimalna cena musi być większa od 0")
+    .positive("Minimalna cena musi być > 0")
     .when("negotiable", {
       is: true,
       then: (schema) => schema.required("Podaj minimalną cenę"),
       otherwise: (schema) => schema.notRequired(),
     }),
-  pickup: Yup.boolean(),
-  shipping: Yup.boolean(),
+  pickupOnly: Yup.boolean(),
+  onlineSale: Yup.boolean(),
   images: Yup.array().min(1, "Dodaj co najmniej jedno zdjęcie"),
+  location: Yup.object<Location>()
+    .nullable()
+    .when("pickupOnly", {
+      is: true,
+      then: (schema) =>
+        schema.required("Wskaż miasto odbioru przy odbiorze osobistym"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
   specification: Yup.object().test(
     "all-required",
     "Wypełnij wszystkie wymagane pola specyfikacji",
@@ -109,18 +117,20 @@ const AddnewAnn: React.FC = () => {
       Object.entries(values).forEach(([key, val]) => {
         if (key === "images") {
           (val as File[]).forEach((file) => formData.append("images", file));
+        } else if (key === "location" && val) {
+          formData.append("location", JSON.stringify(val));
         } else {
-          // specification to już obiekt, backend sobie JSON parse
           formData.append(
             key,
             typeof val === "object" ? JSON.stringify(val) : String(val)
           );
         }
       });
-      const { data } = await api.post("/announcements/create", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      return data;
+      return (
+        await api.post("/announcements/create", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        })
+      ).data;
     },
     onSuccess: () => {
       toast.success("Ogłoszenie dodane!");
@@ -140,35 +150,35 @@ const AddnewAnn: React.FC = () => {
         specification: {},
         description: "",
         offerType: "",
-        pickupOnly: false,
-        onlineSale: false,
         price: "",
         negotiable: false,
         minPrice: "",
-        pickup: false,
-        shipping: false,
+        pickupOnly: false,
+        onlineSale: false,
         images: [],
+        location: null,
       }}
       validationSchema={AddNewAnnSchema}
-      // włączamy domyślną walidację na change i blur
-      validateOnChange={true}
-      validateOnBlur={true}
+      validateOnChange
+      validateOnBlur
       onSubmit={async (values, { setTouched, validateForm }) => {
         const errors = await validateForm();
         if (Object.keys(errors).length > 0) {
-          const touched: any = {};
-          Object.keys(errors).forEach((k) => (touched[k] = true));
+          const touchedFields: any = {};
+          Object.keys(errors).forEach((k) => (touchedFields[k] = true));
           if (errors.specification) {
-            touched.specification = markNestedTouched(errors.specification);
+            touchedFields.specification = markNestedTouched(
+              errors.specification
+            );
           }
-          setTouched(touched, false);
+          setTouched(touchedFields, false);
           toast.error("Popraw błędy przed zapisaniem.");
           return;
         }
         mutate(values);
       }}
     >
-      {({ values, setTouched }) => {
+      {({ values, setFieldValue, setTouched, touched, errors }) => {
         const {
           data: fields,
           isLoading,
@@ -183,8 +193,17 @@ const AddnewAnn: React.FC = () => {
         );
 
         return (
-          <Form className="mt-5">
+          <Form className="mt-5 space-y-6">
             <CategoryAnn />
+
+            <LocationPicker
+              selectedLocation={values.location}
+              onLocationChange={(loc) => setFieldValue("location", loc)}
+            />
+            {touched.location && errors.location && (
+              <p className="text-red-500 text-sm">{errors.location}</p>
+            )}
+
             {isLoading && (
               <p className="text-center">Ładowanie specyfikacji…</p>
             )}
@@ -194,6 +213,7 @@ const AddnewAnn: React.FC = () => {
               </p>
             )}
             {fields && <Specification fields={fields} />}
+
             <ImagesUpload />
             <Description />
             <Type />
