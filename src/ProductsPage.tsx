@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useSwipeable } from "react-swipeable";
 import { useSingleAnnouncement } from "../hooks/useGetSingleAnn";
+import { useCreateConversation } from "../hooks/useCreateConversation";
 
 const formatPrice = (price: number) => {
   const [integerPart, decimalPart] = price.toFixed(2).split(".");
@@ -14,22 +15,24 @@ const formatPrice = (price: number) => {
 };
 
 const ProductPage: React.FC = () => {
-  const { id } = useParams();
-  const { data: product, isLoading } = useSingleAnnouncement(id as string);
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+
+  const { data: product, isLoading } = useSingleAnnouncement(id!);
+  const { mutate: createConversation, isLoading: creatingConversation } =
+    useCreateConversation();
 
   const [currentImage, setCurrentImage] = useState(0);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [imageAnimation, setImageAnimation] = useState<string>("");
+  const [imageAnimation, setImageAnimation] = useState("");
 
-
-  const images =
-    product?.images && product.images.length > 0
-      ? product.images
-      : [
-          "https://picsum.photos/400/300?random=1",
-          "https://picsum.photos/400/300?random=2",
-          "https://picsum.photos/400/300?random=3",
-        ];
+  const images = product?.images?.length
+    ? product.images
+    : [
+        "https://picsum.photos/400/300?random=1",
+        "https://picsum.photos/400/300?random=2",
+        "https://picsum.photos/400/300?random=3",
+      ];
 
   const handleImageChange = (direction: "next" | "prev") => {
     if (direction === "next") {
@@ -43,7 +46,6 @@ const ProductPage: React.FC = () => {
 
   useEffect(() => {
     if (imageAnimation) {
-     
       const timeout = setTimeout(() => setImageAnimation(""), 300);
       return () => clearTimeout(timeout);
     }
@@ -63,6 +65,22 @@ const ProductPage: React.FC = () => {
       setImageAnimation("slideInFromLeft");
     }
     setCurrentImage(index);
+  };
+
+  const handleCreateConversation = () => {
+    if (!product) return;
+
+    createConversation(
+      { recipientId: product.userId, productId: product._id },
+      {
+        onSuccess: (data) => {
+          navigate(`/chat/${data.conversation._id}`);
+        },
+        onError: () => {
+          alert("Nie udało się utworzyć konwersacji.");
+        },
+      }
+    );
   };
 
   if (isLoading || !product) {
@@ -90,8 +108,16 @@ const ProductPage: React.FC = () => {
           <button className="bg-gray-200 text-gray-800 px-6 py-2 rounded-md shadow-md hover:bg-gray-300 transition-all duration-300 transform hover:scale-105">
             Zaproponuj cenę
           </button>
-          <button className="bg-gray-200 text-gray-800 px-6 py-2 rounded-md shadow-md hover:bg-gray-300 transition-all duration-300 transform hover:scale-105">
-            Wyślij wiadomość
+          <button
+            onClick={handleCreateConversation}
+            disabled={creatingConversation}
+            className={`px-6 py-2 rounded-md shadow-md transition-all duration-300 transform ${
+              creatingConversation
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+            }`}
+          >
+            {creatingConversation ? "Tworzenie..." : "Wyślij wiadomość"}
           </button>
         </div>
       </div>
@@ -126,7 +152,9 @@ const ProductPage: React.FC = () => {
                   key={idx}
                   src={img}
                   alt={`Miniatura ${idx + 1}`}
-                  onClick={(e) => handleImageClick(idx, e)}
+                  onClick={(
+                    e: React.MouseEvent<HTMLImageElement, MouseEvent>
+                  ) => handleImageClick(idx, e)}
                   className={`w-20 h-20 object-cover rounded-lg cursor-pointer transition-transform duration-300 transform ${
                     currentImage === idx
                       ? "scale-110 border-2 border-[#006F91] opacity-90"
@@ -146,17 +174,16 @@ const ProductPage: React.FC = () => {
 
           <div className="mt-6 w-full bg-gray-50 p-4 rounded-lg shadow-sm flex-1">
             <h2 className="text-lg font-semibold text-gray-800 mb-2">
-              <b>OPIS PRODUKTU</b>
+              OPIS PRODUKTU
             </h2>
             <p className="text-sm text-gray-700">{product.description}</p>
           </div>
 
-          {/* Mobile view extra info */}
           <div className="block lg:hidden space-y-6 mt-6 w-full">
             {product.specification && (
               <div className="p-4 rounded-lg bg-gray-50 shadow-sm">
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                  <b>SPECYFIKACJA</b>
+                  SPECYFIKACJA
                 </h3>
                 <ul className="list-disc pl-5 text-sm text-gray-700">
                   {Object.entries(product.specification).map(([key, value]) => (
@@ -171,7 +198,6 @@ const ProductPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Right side - details and actions on desktop */}
         <div className="hidden lg:block lg:w-[30%] space-y-6">
           <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
             <h1 className="text-2xl font-bold text-gray-800 mb-2">
@@ -180,16 +206,23 @@ const ProductPage: React.FC = () => {
             <p className="text-xl font-semibold text-[#006F91] mb-4">
               {formatPrice(product.price)}
             </p>
-
-            <div className="flex flex-col gap-3 mt-4">
-              <button className="bg-[#006F91] text-white px-6 py-2 rounded-md shadow-md hover:bg-[#00597A] transition-all duration-300">
+            <div className="flex flex-col gap-3">
+              <button className="bg-[#006F91] text-white px-6 py-2 rounded-md shadow-md hover:bg-[#00597A] transition-all duration-300 transform hover:scale-105">
                 Kup teraz
               </button>
-              <button className="bg-gray-200 text-gray-800 px-6 py-2 rounded-md shadow-md hover:bg-gray-300 transition-all duration-300">
+              <button className="bg-gray-200 text-gray-800 px-6 py-2 rounded-md shadow-md hover:bg-gray-300 transition-all duration-300 transform hover:scale-105">
                 Zaproponuj cenę
               </button>
-              <button className="bg-gray-200 text-gray-800 px-6 py-2 rounded-md shadow-md hover:bg-gray-300 transition-all duration-300">
-                Wyślij wiadomość
+              <button
+                onClick={handleCreateConversation}
+                disabled={creatingConversation}
+                className={`px-6 py-2 rounded-md shadow-md transition-all duration-300 transform ${
+                  creatingConversation
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+                }`}
+              >
+                {creatingConversation ? "Tworzenie..." : "Wyślij wiadomość"}
               </button>
             </div>
           </div>
@@ -197,7 +230,7 @@ const ProductPage: React.FC = () => {
           {product.specification && (
             <div className="p-4 rounded-lg bg-gray-50 shadow-sm">
               <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                <b>SPECYFIKACJA</b>
+                SPECYFIKACJA
               </h3>
               <ul className="list-disc pl-5 text-sm text-gray-700">
                 {Object.entries(product.specification).map(([key, value]) => (
@@ -214,58 +247,14 @@ const ProductPage: React.FC = () => {
 
       {isPreviewOpen && (
         <div
+          className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50"
           onClick={() => setIsPreviewOpen(false)}
-          className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4"
-          {...swipeHandlers}
         >
-          <div
-            className="relative w-full max-w-3xl max-h-[80vh] flex flex-col justify-center items-center bg-gray-900 rounded-lg shadow-lg"
-            onClick={(e) => e.stopPropagation()} // żeby kliknięcie na obraz nie zamykało podglądu
-          >
-            <img
-              src={images[currentImage]}
-              alt="Podgląd"
-              className="max-w-full max-h-[70vh] object-contain rounded-lg"
-            />
-            <button
-              onClick={() => setIsPreviewOpen(false)}
-              className="absolute top-3 right-3 text-white bg-gray-800 bg-opacity-70 hover:bg-opacity-90 transition-all rounded-full w-10 h-10 flex items-center justify-center cursor-pointer shadow-md"
-              aria-label="Zamknij podgląd"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          </div>
-
-          <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
-            {images.map((image: string, index: number) => (
-              <img
-                key={index}
-                src={image}
-                alt={`Miniatura ${index + 1}`}
-                className={`w-12 h-12 object-cover rounded-lg cursor-pointer transition-transform duration-300 transform ${
-                  currentImage === index
-                    ? "scale-110 border-2 border-[#006F91] opacity-90"
-                    : "opacity-50 hover:scale-105"
-                }`}
-                onClick={(e: React.MouseEvent<HTMLImageElement>) =>
-                  handleImageClick(index, e)
-                }
-              />
-            ))}
-          </div>
+          <img
+            src={images[currentImage]}
+            alt={`Podgląd zdjęcia ${currentImage + 1}`}
+            className="max-w-full max-h-full rounded-lg"
+          />
         </div>
       )}
     </div>
