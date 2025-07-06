@@ -28,8 +28,8 @@ export interface FormValues {
   price: string;
   negotiable: boolean;
   minPrice: string;
-  pickupOnly: boolean;
-  onlineSale: boolean;
+  pickup: boolean;
+  shipping: boolean;
   images: File[];
   location: Location | null;
 }
@@ -51,31 +51,31 @@ export const AddNewAnnSchema = Yup.object().shape({
     .min(20, "Minimum 20 znaków")
     .required("Opis jest wymagany"),
   offerType: Yup.string()
-    .required("Wybierz typ ogłoszenia")
-    .oneOf(["Sprzedaż", "Wynajem", "Zamiana", "Usługa", "Inne"]),
+    .oneOf(["Sprzedaż", "Wynajem", "Zamiana", "Usługa", "Inne"])
+    .required("Wybierz typ ogłoszenia"),
   price: Yup.number()
     .typeError("Cena musi być liczbą")
-    .positive("Cena musi być > 0")
+    .positive("Cena musi być większa od 0")
     .required("Cena jest wymagana"),
   negotiable: Yup.boolean(),
   minPrice: Yup.number()
     .typeError("Minimalna cena musi być liczbą")
-    .positive("Minimalna cena musi być > 0")
+    .positive("Minimalna cena musi być większa od 0")
     .when("negotiable", {
       is: true,
       then: (schema) => schema.required("Podaj minimalną cenę"),
-      otherwise: (schema) => schema.notRequired(),
     }),
-  pickupOnly: Yup.boolean(),
-  onlineSale: Yup.boolean(),
+  pickup: Yup.boolean(),
+  shipping: Yup.boolean(),
   images: Yup.array().min(1, "Dodaj co najmniej jedno zdjęcie"),
   location: Yup.object<Location>()
     .nullable()
-    .when("pickupOnly", {
+    .when("pickup", {
       is: true,
       then: (schema) =>
-        schema.required("Wskaż miasto odbioru przy odbiorze osobistym"),
-      otherwise: (schema) => schema.notRequired(),
+        (schema as any).required(
+          "Wskaż miasto odbioru przy odbiorze osobistym"
+        ),
     }),
   specification: Yup.object().test(
     "all-required",
@@ -126,11 +126,10 @@ const AddnewAnn: React.FC = () => {
           );
         }
       });
-      return (
-        await api.post("/announcements/create", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        })
-      ).data;
+      const { data } = await api.post("/announcements/create", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return data;
     },
     onSuccess: () => {
       toast.success("Ogłoszenie dodane!");
@@ -153,8 +152,8 @@ const AddnewAnn: React.FC = () => {
         price: "",
         negotiable: false,
         minPrice: "",
-        pickupOnly: false,
-        onlineSale: false,
+        pickup: false,
+        shipping: false,
         images: [],
         location: null,
       }}
@@ -164,21 +163,19 @@ const AddnewAnn: React.FC = () => {
       onSubmit={async (values, { setTouched, validateForm }) => {
         const errors = await validateForm();
         if (Object.keys(errors).length > 0) {
-          const touchedFields: any = {};
-          Object.keys(errors).forEach((k) => (touchedFields[k] = true));
+          const tf: any = {};
+          Object.keys(errors).forEach((k) => (tf[k] = true));
           if (errors.specification) {
-            touchedFields.specification = markNestedTouched(
-              errors.specification
-            );
+            tf.specification = markNestedTouched(errors.specification);
           }
-          setTouched(touchedFields, false);
-          toast.error("Popraw błędy przed zapisaniem.");
+          setTouched(tf, false);
+          toast.error("Popraw błędy formularza.");
           return;
         }
         mutate(values);
       }}
     >
-      {({ values, setFieldValue, setTouched, touched, errors }) => {
+      {({ values, setFieldValue, touched, errors, setTouched }) => {
         const {
           data: fields,
           isLoading,
@@ -194,37 +191,50 @@ const AddnewAnn: React.FC = () => {
 
         return (
           <Form className="mt-5 space-y-6">
+            {/* 1) Category */}
             <CategoryAnn />
 
-            <LocationPicker
-              selectedLocation={values.location}
-              onLocationChange={(loc) => setFieldValue("location", loc)}
-            />
-            {touched.location && errors.location && (
-              <p className="text-red-500 text-sm">{errors.location}</p>
-            )}
-
-            {isLoading && (
-              <p className="text-center">Ładowanie specyfikacji…</p>
-            )}
+            {/* 2) Dynamic specs for selected category */}
+            {isLoading && <p>Ładowanie specyfikacji…</p>}
             {isError && (
-              <p className="text-center text-red-500">
-                Błąd pobierania specyfikacji.
-              </p>
+              <p className="text-red-500">Błąd pobierania specyfikacji.</p>
             )}
             {fields && <Specification fields={fields} />}
 
+            {/* 3) Images */}
             <ImagesUpload />
+
+            {/* 4) Description */}
             <Description />
+
+            {/* 5) Offer type */}
             <Type />
+
+            {/* 6) Price */}
             <Prize />
+
+            {/* 7) Shipment & pickup */}
             <Shipment />
 
-            <div className="max-w-6xl mx-auto text-right p-6">
+            {/* 8) Location picker (only if pickup==true) */}
+            {values.pickup && (
+              <>
+                <LocationPicker
+                  selectedLocation={values.location}
+                  onLocationChange={(loc) => setFieldValue("location", loc)}
+                />
+                {touched.location && errors.location && (
+                  <p className="text-red-500 text-sm">{errors.location}</p>
+                )}
+              </>
+            )}
+
+            {/* 9) Submit */}
+            <div className="text-right max-w-6xl mx-auto">
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`px-6 py-2 rounded-xl shadow text-white ${
+                className={`px-6 py-2 rounded-xl text-white ${
                   isSubmitting ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
                 }`}
               >
