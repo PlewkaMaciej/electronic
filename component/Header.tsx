@@ -22,7 +22,7 @@ const menuItems: MenuItem[] = [
   { label: "Konto i bezpieczeństwo", href: "/account-security" },
   { label: "Wysyłka", href: "/shipping" },
   { label: "Prywatność", href: "/privacy" },
-  { label: "Sprzedawanie", href: "/addNewAnn" }, // zmienione
+  { label: "Sprzedawanie", href: "/addNewAnn" },
 ];
 
 const categories = [
@@ -48,7 +48,6 @@ const Header: React.FC = () => {
   const user = useSelector((state: RootState) => state.auth.user);
   const accountWrapperRef = useRef<HTMLDivElement>(null);
 
-  // obsługa kliknięcia poza menu
   useEffect(() => {
     setIsLogged(!!user);
     if (!accountOpen) return;
@@ -133,7 +132,7 @@ const Header: React.FC = () => {
 
           {isLogged && (
             <button
-              onClick={() => navigate("/addNewAnn")} // zmienione
+              onClick={() => navigate("/addNewAnn")}
               className="px-6 py-2 bg-[#339FB8] text-white rounded-lg hover:bg-[#2a8ba0] transition"
             >
               Sprzedaj
@@ -156,7 +155,7 @@ const Header: React.FC = () => {
       {mobileOpen && (
         <div className="lg:hidden mt-4 bg-white shadow-lg rounded-xl p-4 space-y-3 mx-auto max-w-7xl">
           <button
-            onClick={() => isLogged && navigate("/addNewAnn")} // zmienione
+            onClick={() => isLogged && navigate("/addNewAnn")}
             className={`w-full py-2 rounded-lg text-white ${
               isLogged ? "bg-[#339FB8]" : "bg-gray-400 cursor-not-allowed"
             }`}

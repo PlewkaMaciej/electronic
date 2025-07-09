@@ -1,4 +1,3 @@
-// src/AddnewAnn.tsx
 import React from "react";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
@@ -15,7 +14,7 @@ import Type from "../component/AddnewAnnComponent/Type";
 import Prize from "../component/AddnewAnnComponent/Prize";
 import Shipment from "../component/AddnewAnnComponent/Shipment";
 
-import LocationPicker, { Location } from "./locationPicker/locationPicker";
+import LocationPicker from "./locationPicker/locationPicker";
 import api from "./api/axios";
 import type { RootState } from "./store";
 
@@ -31,7 +30,7 @@ export interface FormValues {
   pickup: boolean;
   shipping: boolean;
   images: File[];
-  location: Location | null;
+  location: string; 
 }
 
 function markNestedTouched(obj: any): any {
@@ -42,7 +41,7 @@ function markNestedTouched(obj: any): any {
   }, {} as any);
 }
 
-export const AddNewAnnSchema = Yup.object().shape({
+const validationSchema = Yup.object({
   category: Yup.string().required("Kategoria jest wymagana"),
   title: Yup.string()
     .min(5, "Minimum 5 znaków")
@@ -55,12 +54,12 @@ export const AddNewAnnSchema = Yup.object().shape({
     .required("Wybierz typ ogłoszenia"),
   price: Yup.number()
     .typeError("Cena musi być liczbą")
-    .positive("Cena musi być większa od 0")
+    .positive("Cena musi być > 0")
     .required("Cena jest wymagana"),
   negotiable: Yup.boolean(),
   minPrice: Yup.number()
     .typeError("Minimalna cena musi być liczbą")
-    .positive("Minimalna cena musi być większa od 0")
+    .positive("Minimalna cena musi być > 0")
     .when("negotiable", {
       is: true,
       then: (schema) => schema.required("Podaj minimalną cenę"),
@@ -68,15 +67,12 @@ export const AddNewAnnSchema = Yup.object().shape({
   pickup: Yup.boolean(),
   shipping: Yup.boolean(),
   images: Yup.array().min(1, "Dodaj co najmniej jedno zdjęcie"),
-  location: Yup.object<Location>()
-    .nullable()
-    .when("pickup", {
-      is: true,
-      then: (schema) =>
-        (schema as any).required(
-          "Wskaż miasto odbioru przy odbiorze osobistym"
-        ),
-    }),
+  location: Yup.string().when("pickup", {
+    is: true,
+    then: (schema) =>
+      schema.required("Wskaż miasto odbioru przy odbiorze osobistym"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
   specification: Yup.object().test(
     "all-required",
     "Wypełnij wszystkie wymagane pola specyfikacji",
@@ -106,7 +102,7 @@ const fetchSpecs = async (category: string) => {
   return data.fields;
 };
 
-const AddnewAnn: React.FC = () => {
+const AddNewAnn: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const userId = useSelector((s: RootState) => s.auth.user?._id);
@@ -117,8 +113,6 @@ const AddnewAnn: React.FC = () => {
       Object.entries(values).forEach(([key, val]) => {
         if (key === "images") {
           (val as File[]).forEach((file) => formData.append("images", file));
-        } else if (key === "location" && val) {
-          formData.append("location", JSON.stringify(val));
         } else {
           formData.append(
             key,
@@ -155,11 +149,9 @@ const AddnewAnn: React.FC = () => {
         pickup: false,
         shipping: false,
         images: [],
-        location: null,
+        location: "",
       }}
-      validationSchema={AddNewAnnSchema}
-      validateOnChange
-      validateOnBlur
+      validationSchema={validationSchema}
       onSubmit={async (values, { setTouched, validateForm }) => {
         const errors = await validateForm();
         if (Object.keys(errors).length > 0) {
@@ -191,37 +183,26 @@ const AddnewAnn: React.FC = () => {
 
         return (
           <Form className="mt-5 space-y-6">
-            {/* 1) Category */}
             <CategoryAnn />
 
-            {/* 2) Dynamic specs for selected category */}
             {isLoading && <p>Ładowanie specyfikacji…</p>}
             {isError && (
               <p className="text-red-500">Błąd pobierania specyfikacji.</p>
             )}
             {fields && <Specification fields={fields} />}
 
-            {/* 3) Images */}
             <ImagesUpload />
-
-            {/* 4) Description */}
             <Description />
-
-            {/* 5) Offer type */}
             <Type />
-
-            {/* 6) Price */}
             <Prize />
-
-            {/* 7) Shipment & pickup */}
             <Shipment />
 
-            {/* 8) Location picker (only if pickup==true) */}
+            {/* tylko gdy odbiór osobisty */}
             {values.pickup && (
               <>
                 <LocationPicker
-                  selectedLocation={values.location}
-                  onLocationChange={(loc) => setFieldValue("location", loc)}
+                  city={values.location}
+                  onCityChange={(city) => setFieldValue("location", city)}
                 />
                 {touched.location && errors.location && (
                   <p className="text-red-500 text-sm">{errors.location}</p>
@@ -229,7 +210,6 @@ const AddnewAnn: React.FC = () => {
               </>
             )}
 
-            {/* 9) Submit */}
             <div className="text-right max-w-6xl mx-auto">
               <button
                 type="submit"
@@ -248,4 +228,4 @@ const AddnewAnn: React.FC = () => {
   );
 };
 
-export default AddnewAnn;
+export default AddNewAnn;
