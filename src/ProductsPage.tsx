@@ -93,7 +93,7 @@ const ProductPage: React.FC = () => {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      {/* Mobile view header + buttons */}
+     
       <div className="block lg:hidden mb-6">
         <h1 className="text-xl font-bold text-gray-800 mb-2">
           {product.title}
@@ -122,9 +122,9 @@ const ProductPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Main content layout */}
+    
       <div className="flex flex-col lg:flex-row gap-6 border border-gray-200 p-6 rounded-2xl shadow-xl bg-white">
-        {/* Left side - images */}
+      
         <div className="relative flex flex-col items-center bg-white rounded-lg p-4 max-w-md mx-auto lg:max-w-full lg:w-[70%]">
           <div
             {...swipeHandlers}

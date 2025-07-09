@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import UserPanelNav from "./Items/UserPanelNav";
 import ChatSidebar from "./Items/ChatSideBar";
+import { useUserConversations } from "../../hooks/useUserConversations";
+import ChatHeader from "../../component/ChatComponent/ChatHeader"
+import ChatMessages from "../../component/ChatComponent/CharMessages"
+import ChatInput from "../../component/ChatComponent/ChatInput"
 
 interface ChatPreview {
-  id: number;
+  id: string;
   name: string;
   lastMessage: string;
+  announcementTitle?: string;
+  announcementImage?: string;
+  userLastName?: string;
 }
 
 interface Message {
@@ -15,26 +23,72 @@ interface Message {
 }
 
 const Chat: React.FC = () => {
-  const chats: ChatPreview[] = [
-    { id: 1, name: "Jan Kowalski", lastMessage: "Dzięki, odezwę się jutro." },
-    {
-      id: 2,
-      name: "Maria Nowak",
-      lastMessage: "Czy oferta jest dalej aktualna?",
-    },
-    { id: 3, name: "Adam Zieliński", lastMessage: "Wysyłam dane do przelewu." },
-  ];
+  const { data: chats, isLoading } = useUserConversations();
+  const userId = localStorage.getItem("userId") || "";
 
   const [selectedChat, setSelectedChat] = useState<ChatPreview | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth < 768);
+  const [chatPreviews, setChatPreviews] = useState<ChatPreview[]>([]);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  useEffect(() => {
+    const fetchChatUsers = async () => {
+      if (!chats) return;
+
+      const previews = await Promise.all(
+        chats.map(async (conv: any) => {
+          const partnerId = conv.members.find((id: string) => id !== userId);
+          const productId = conv.productId;
+
+          try {
+            const [userRes, annRes] = await Promise.all([
+              axios.get(`/users/${partnerId}`),
+              productId
+                ? axios.get(`/announcements/getSingleAnn/${productId}`)
+                : Promise.resolve({ data: { announcement: null } }),
+            ]);
+
+            const user = userRes.data.user;
+            const announcement = annRes.data.announcement;
+            const fullName = `${user.firstName}`;
+            const lastName = user.lastName;
+            const announcementTitle = announcement?.title || "";
+            const announcementImage =
+              announcement?.images && announcement.images.length > 0
+                ? announcement.images[0]
+                : "";
+
+            return {
+              id: conv._id,
+              name: fullName,
+              userLastName: lastName,
+              lastMessage: conv.lastMessage || "Brak wiadomości",
+              announcementTitle,
+              announcementImage,
+            };
+          } catch (error) {
+            console.error("Błąd przy pobieraniu danych rozmowy:", error);
+            return {
+              id: conv._id,
+              name: "Nieznany użytkownik",
+              lastMessage: conv.lastMessage || "Brak wiadomości",
+            };
+          }
+        })
+      );
+
+      setChatPreviews(previews);
+    };
+
+    fetchChatUsers();
+  }, [chats, userId]);
 
   const sendMessage = () => {
     if (!newMessage.trim()) return;
@@ -54,6 +108,8 @@ const Chat: React.FC = () => {
 
   const handleSelectChat = (chat: ChatPreview) => {
     setSelectedChat(chat);
+
+    // Tutaj możesz dodać pobieranie wiadomości z API
     setMessages([
       {
         id: 1,
@@ -71,68 +127,37 @@ const Chat: React.FC = () => {
       <div className="w-full lg:w-1/4">
         <UserPanelNav />
       </div>
-    
+
+      {/* Sidebar z czatami */}
       {(!isMobile || !selectedChat) && (
-        <div className="w-full  mt-6 max-w-[250px] overflow-y-auto">
-          <ChatSidebar chats={chats} onSelectChat={handleSelectChat} />
+        <div className="w-full mt-6 max-w-[250px] overflow-y-auto">
+          {isLoading ? (
+            <p>Ładowanie...</p>
+          ) : (
+            <ChatSidebar chats={chatPreviews} onSelectChat={handleSelectChat} />
+          )}
         </div>
       )}
 
       {/* Okno rozmowy */}
       {selectedChat && (
-        <div className="w-full   mt-6 md:w-3/4 max-w-[600px] border border-gray-300 rounded-2xl shadow-md p-4 bg-white h-[70vh] flex flex-col">
-          {/* Pasek górny */}
-          <div className="border-b pb-2 mb-4 flex items-center justify-between">
-            {isMobile && (
-              <button
-                onClick={handleBack}
-                className="text-blue-500 font-semibold text-sm"
-              >
-                ← Wróć
-              </button>
-            )}
-            <p className="text-lg font-semibold text-gray-800 mx-auto md:mx-0">
-              {selectedChat.name}
-            </p>
-          </div>
+        <div className="w-full mt-6 md:w-3/4 max-w-[600px] border border-gray-300 rounded-2xl shadow-md p-4 bg-white h-[70vh] flex flex-col">
+          <ChatHeader
+            isMobile={isMobile}
+            onBack={handleBack}
+            userName={selectedChat.name}
+            userLastName={selectedChat.userLastName}
+            productTitle={selectedChat.announcementTitle}
+            productImage={selectedChat.announcementImage}
+          />
 
-          {/* Historia wiadomości */}
-          <div className="flex-1 overflow-y-auto space-y-2 mb-4 pr-2">
-            {messages.length > 0 ? (
-              messages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className={`max-w-[70%] p-2 rounded-xl text-sm ${
-                    msg.sender === "me"
-                      ? "bg-blue-100 text-right ml-auto"
-                      : "bg-gray-100"
-                  }`}
-                >
-                  {msg.content}
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-400">Brak wiadomości</p>
-            )}
-          </div>
+          <ChatMessages messages={messages} />
 
-          {/* Pole do pisania */}
-          <div className="flex items-center border-t pt-3">
-            <input
-              type="text"
-              placeholder="Napisz wiadomość..."
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-              className="flex-1 p-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300"
-            />
-            <button
-              onClick={sendMessage}
-              className="ml-3 px-3 py-1 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition text-sm"
-            >
-              Wyślij
-            </button>
-          </div>
+          <ChatInput
+            newMessage={newMessage}
+            onChange={setNewMessage}
+            onSend={sendMessage}
+          />
         </div>
       )}
     </div>

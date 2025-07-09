@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 
 interface ChatPreview {
-  id: number;
+  id: string;  
   name: string;
   lastMessage: string;
 }
+
 
 interface ChatSidebarProps {
   chats: ChatPreview[];
