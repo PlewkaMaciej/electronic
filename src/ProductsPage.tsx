@@ -20,14 +20,14 @@ const ProductPage: React.FC = () => {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      {/** --- MOBILNY HEADER + PRZYCISKI --- **/}
+      
       <div className="block lg:hidden mb-6">
         <MobileHeader title={product.title} price={product.price} />
         <ProductActions title={product.title} price={product.price} />
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6 border border-gray-200 p-6 rounded-2xl shadow-xl bg-white">
-        {/** --- LEWA CZĘŚĆ: KARUZELA I OPIS --- **/}
+      
         <div className="lg:w-[70%]">
           <ImageCarousel
             images={product.images}
@@ -46,7 +46,7 @@ const ProductPage: React.FC = () => {
           </div>
         </div>
 
-        {/** --- PRAWA CZĘŚĆ (DESKTOP) --- **/}
+        
         <div className="hidden lg:block lg:w-[30%] space-y-6">
           <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
             <h1 className="text-2xl font-bold mb-2">{product.title}</h1>

@@ -3,9 +3,10 @@ import axios from "axios";
 import UserPanelNav from "./Items/UserPanelNav";
 import ChatSidebar from "./Items/ChatSideBar";
 import { useUserConversations } from "../../hooks/useUserConversations";
-import ChatHeader from "../../component/ChatComponent/ChatHeader"
-import ChatMessages from "../../component/ChatComponent/CharMessages"
-import ChatInput from "../../component/ChatComponent/ChatInput"
+import { useConversationMessages } from "../../hooks/useConversationMessages";
+import ChatHeader from "../../component/ChatComponent/ChatHeader";
+import ChatMessages from "../../component/ChatComponent/CharMessages";
+import ChatInput from "../../component/ChatComponent/ChatInput";
 
 interface ChatPreview {
   id: string;
@@ -17,26 +18,41 @@ interface ChatPreview {
 }
 
 interface Message {
-  id: number;
-  sender: "me" | "them";
-  content: string;
+  _id: string;
+  senderId: string;
+  text: string;
+  createdAt: string;
 }
 
 const Chat: React.FC = () => {
   const { data: chats, isLoading } = useUserConversations();
   const userId = localStorage.getItem("userId") || "";
+  const token = localStorage.getItem("accessToken") || "";
 
   const [selectedChat, setSelectedChat] = useState<ChatPreview | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth < 768);
   const [chatPreviews, setChatPreviews] = useState<ChatPreview[]>([]);
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
+
+  const {
+    data: fetchedMessages,
+    refetch,
+    isLoading: loadingMessages,
+  } = useConversationMessages(currentConversationId || "");
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  useEffect(() => {
+    if (fetchedMessages) {
+      setMessages(fetchedMessages);
+    }
+  }, [fetchedMessages]);
 
   useEffect(() => {
     const fetchChatUsers = async () => {
@@ -49,9 +65,15 @@ const Chat: React.FC = () => {
 
           try {
             const [userRes, annRes] = await Promise.all([
-              axios.get(`/users/${partnerId}`),
+              axios.get(`/users/${partnerId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+                withCredentials: true,
+              }),
               productId
-                ? axios.get(`/announcements/getSingleAnn/${productId}`)
+                ? axios.get(`/announcements/getSingleAnn/${productId}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                    withCredentials: true,
+                  })
                 : Promise.resolve({ data: { announcement: null } }),
             ]);
 
@@ -88,37 +110,41 @@ const Chat: React.FC = () => {
     };
 
     fetchChatUsers();
-  }, [chats, userId]);
+  }, [chats, userId, token]);
 
-  const sendMessage = () => {
-    if (!newMessage.trim()) return;
-    const newMsg: Message = {
-      id: Date.now(),
-      sender: "me",
-      content: newMessage.trim(),
-    };
-    setMessages((prev) => [...prev, newMsg]);
-    setNewMessage("");
+  const handleSelectChat = (chat: ChatPreview) => {
+    setSelectedChat(chat);
+    setCurrentConversationId(chat.id);
   };
 
   const handleBack = () => {
     setSelectedChat(null);
     setMessages([]);
+    setCurrentConversationId(null);
   };
 
-  const handleSelectChat = (chat: ChatPreview) => {
-    setSelectedChat(chat);
+  const sendMessage = async () => {
+    if (!newMessage.trim() || !currentConversationId) return;
 
-    // Tutaj możesz dodać pobieranie wiadomości z API
-    setMessages([
-      {
-        id: 1,
-        sender: "them",
-        content: "Cześć, jestem zainteresowany ogłoszeniem.",
-      },
-      { id: 2, sender: "them", content: "Czy nadal jest dostępne?" },
-      { id: 3, sender: "me", content: "Tak, ogłoszenie jest aktualne." },
-    ]);
+    try {
+      const response = await axios.post(
+        "/chat/send-message",
+        {
+          conversationId: currentConversationId,
+          text: newMessage,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        }
+      );
+
+      const sentMessage = response.data.newMessage;
+      setMessages((prev) => [...prev, sentMessage]);
+      setNewMessage("");
+    } catch (error) {
+      console.error("Błąd przy wysyłaniu wiadomości:", error);
+    }
   };
 
   return (
@@ -151,7 +177,11 @@ const Chat: React.FC = () => {
             productImage={selectedChat.announcementImage}
           />
 
-          <ChatMessages messages={messages} />
+          {loadingMessages ? (
+            <p className="text-gray-400">Ładowanie wiadomości...</p>
+          ) : (
+            <ChatMessages messages={messages} />
+          )}
 
           <ChatInput
             newMessage={newMessage}
