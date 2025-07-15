@@ -165,7 +165,7 @@ const RegisterPage: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-[#339FB8] text-white py-3 rounded-lg shadow-md hover:bg-[#2b8fa6] transition-all duration-200 font-medium disabled:opacity-60"
+              className="w-full  text-white py-3 rounded-lg shadow-md ] transition-all duration-200 font-medium disabled:opacity-60   hover:bg-[#00597A] bg-[#006F91]"
             >
               {isLoading ? "Rejestrowanie..." : "Zarejestruj się"}
             </button>

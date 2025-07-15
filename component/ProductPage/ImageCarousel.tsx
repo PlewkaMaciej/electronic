@@ -1,10 +1,12 @@
+// src/components/ProductPage/ImageCarousel.tsx
 import React, { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useSwipeable } from "react-swipeable";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface Props {
   images: string[];
-  onPreviewOpen: () => void;
+  /** teraz przyjmuje indeks obrazka, który chcemy powiększyć */
+  onPreviewOpen: (index: number) => void;
 }
 
 const ImageCarousel: React.FC<Props> = ({ images, onPreviewOpen }) => {
@@ -47,7 +49,7 @@ const ImageCarousel: React.FC<Props> = ({ images, onPreviewOpen }) => {
       <div
         {...swipe}
         className="bg-gray-50 p-4 rounded-lg shadow-sm mb-6 cursor-pointer w-full"
-        onClick={onPreviewOpen}
+        onClick={() => onPreviewOpen(current)} /* przekazujemy `current` */
       >
         <img
           src={images[current]}
@@ -71,7 +73,7 @@ const ImageCarousel: React.FC<Props> = ({ images, onPreviewOpen }) => {
               src={u}
               onClick={() => onThumbClick(i)}
               className={`w-20 h-20 object-cover rounded-lg cursor-pointer transition-transform duration-300 transform ${
-                i === current
+                current === i
                   ? "scale-110 border-2 border-[#006F91] opacity-90"
                   : "opacity-50 hover:scale-105"
               }`}

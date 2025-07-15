@@ -30,7 +30,7 @@ export interface FormValues {
   pickup: boolean;
   shipping: boolean;
   images: File[];
-  location: string; 
+  location: string;
 }
 
 function markNestedTouched(obj: any): any {
@@ -215,7 +215,9 @@ const AddNewAnn: React.FC = () => {
                 type="submit"
                 disabled={isSubmitting}
                 className={`px-6 py-2 rounded-xl text-white ${
-                  isSubmitting ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
+                  isSubmitting
+                    ? "bg-gray-400"
+                    : "hover:bg-[#00597A] bg-[#006F91]"
                 }`}
               >
                 {isSubmitting ? "Zapisywanie…" : "Zapisz ogłoszenie"}

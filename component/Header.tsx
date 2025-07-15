@@ -133,7 +133,7 @@ const Header: React.FC = () => {
           {isLogged && (
             <button
               onClick={() => navigate("/addNewAnn")}
-              className="px-6 py-2 bg-[#339FB8] text-white rounded-lg hover:bg-[#2a8ba0] transition"
+              className="px-6 py-2  text-white rounded-lg hover:bg-[#00597A] bg-[#006F91] transition"
             >
               Sprzedaj
             </button>

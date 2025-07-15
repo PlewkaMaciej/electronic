@@ -58,7 +58,6 @@ const LoginPage: React.FC = () => {
               error={touched.email && errors.email ? errors.email : ""}
               success={touched.email && !errors.email}
             />
-
             <Field
               name="password"
               as={StyleInput}
@@ -68,18 +67,16 @@ const LoginPage: React.FC = () => {
               error={touched.password && errors.password ? errors.password : ""}
               success={touched.password && !errors.password}
             />
-
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-[#339FB8] text-white py-3 rounded-lg hover:bg-[#2b8fa6] transition disabled:opacity-60"
+              className="w-full  text-white py-3 rounded-lg   hover:bg-[#00597A] bg-[#006F91] transition disabled:opacity-60"
             >
               {isLoading ? "Logowanie..." : "Zaloguj się"}
             </button>
-
             <p className="text-center text-sm mt-2">
               Nie masz konta?{" "}
-              <Link to="/register" className="text-[#339FB8] hover:underline">
+              <Link to="/register" className="text-[#006F91] hover:underline">
                 Zarejestruj się
               </Link>
             </p>

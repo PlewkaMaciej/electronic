@@ -1,20 +1,19 @@
 // src/component/AddnewAnnComponent/Specification.tsx
 import React from "react";
 import { useFormikContext, Field } from "formik";
+import { getLabel } from "../../utils/fieldLabels";
 
 interface FieldDefinition {
   key: string;
-  label: string;
+  label: string; // już nie używamy bezpośrednio
   type: "text" | "select" | "number" | "boolean";
   options?: string[];
   dependsOn?: string;
   optionsMap?: Record<string, string[]>;
 }
-
 interface SpecProps {
   fields: FieldDefinition[];
 }
-
 interface FormValues {
   specification: Record<string, any>;
 }
@@ -24,10 +23,7 @@ const Specification: React.FC<SpecProps> = ({ fields }) => {
   const spec = values.specification || {};
 
   // Grupowanie po prefiksie
-  const getGroup = (key: string) => {
-    const m = key.match(/^[a-z]+/);
-    return m ? m[0] : key;
-  };
+  const getGroup = (key: string) => (key.match(/^[a-z]+/) ?? [key])[0];
   const grouped: Record<string, FieldDefinition[]> = {};
   fields.forEach((f) => {
     const g = getGroup(f.key);
@@ -49,16 +45,16 @@ const Specification: React.FC<SpecProps> = ({ fields }) => {
                   ? f.optionsMap[depVal] || []
                   : f.options || [];
 
-              // jeżeli submit i wartość pusta → błąd
               const showError = submitCount > 0 && !val;
-
-              const inputCls = `w-full p-3 border rounded-xl focus:outline-none focus:ring-2 ${
+              const cls = `w-full p-3 border rounded-xl focus:outline-none focus:ring-2 ${
                 showError
                   ? "border-red-500 ring-red-300"
                   : "border-gray-300 ring-blue-300"
               }`;
 
-              // checkboxy
+              // Pobieramy etykietę z naszego modułu
+              const labelText = getLabel(f.key);
+
               if (f.type === "boolean") {
                 return (
                   <div
@@ -75,7 +71,7 @@ const Specification: React.FC<SpecProps> = ({ fields }) => {
                       className="w-5 h-5 rounded"
                     />
                     <label className="text-sm font-medium text-gray-700">
-                      {f.label}
+                      {labelText}
                     </label>
                   </div>
                 );
@@ -84,9 +80,8 @@ const Specification: React.FC<SpecProps> = ({ fields }) => {
               return (
                 <div key={f.key} className="flex-1 min-w-[200px]">
                   <label className="block text-sm font-medium mb-1 text-gray-700">
-                    {f.label}
+                    {labelText}
                   </label>
-
                   {f.type === "select" ? (
                     <>
                       <select
@@ -95,7 +90,6 @@ const Specification: React.FC<SpecProps> = ({ fields }) => {
                         onChange={(e) => {
                           setFieldValue(path, e.target.value);
                           if (!f.dependsOn) {
-                            // czyść zależne
                             fields
                               .filter((c) => c.dependsOn === f.key)
                               .forEach((ch) =>
@@ -104,10 +98,10 @@ const Specification: React.FC<SpecProps> = ({ fields }) => {
                           }
                         }}
                         disabled={!!f.dependsOn && !depVal}
-                        className={inputCls}
+                        className={cls}
                       >
                         <option value="" disabled>
-                          Wybierz {f.label.toLowerCase()}
+                          Wybierz {labelText.toLowerCase()}
                         </option>
                         {opts.map((o) => (
                           <option key={o} value={o}>
@@ -123,7 +117,7 @@ const Specification: React.FC<SpecProps> = ({ fields }) => {
                     </>
                   ) : (
                     <>
-                      <Field name={path} type={f.type} className={inputCls} />
+                      <Field name={path} type={f.type} className={cls} />
                       {showError && (
                         <p className="text-red-500 text-sm mt-1">
                           To pole jest wymagane

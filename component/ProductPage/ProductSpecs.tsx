@@ -1,4 +1,7 @@
+// src/components/ProductPage/ProductSpecs.tsx
+
 import React from "react";
+import { getLabel } from "../../utils/fieldLabels";
 
 interface Props {
   spec: Record<string, any>;
@@ -10,9 +13,9 @@ const ProductSpecs: React.FC<Props> = ({ spec }) => (
       <b>SPECYFIKACJA</b>
     </h3>
     <ul className="list-disc pl-5 text-sm text-gray-700">
-      {Object.entries(spec).map(([k, v]) => (
-        <li key={k} className="font-bold">
-          {k.charAt(0).toUpperCase() + k.slice(1)}: {String(v)}
+      {Object.entries(spec).map(([key, value]) => (
+        <li key={key} className="font-bold">
+          {getLabel(key)}: {String(value)}
         </li>
       ))}
     </ul>
