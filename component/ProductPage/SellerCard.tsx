@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUserById } from "../../hooks/useUserById";
 import { format } from "date-fns";
-import { pl } from "date-fns/locale/pl";
+import { pl } from "date-fns/locale";
 import ReactCountryFlag from "react-country-flag";
 import userphoto from "../../img/photo.png";
 
@@ -19,13 +19,17 @@ const SellerCard: React.FC<Props> = ({ userId }) => {
   if (isLoading) return <div>Ładowanie sprzedawcy…</div>;
   if (!user) return <div>Sprzedawca nie znaleziony</div>;
 
-  // placeholdery
-  const joinedAt = new Date().toISOString();
+  // placeholderowe rating/reviews
   const rating = 4.84;
   const reviews = 121;
-  const phone = "123 456 789";
 
-  const joinedDate = format(new Date(joinedAt), "dd.MM.yyyy", { locale: pl });
+  // Parsujemy string z backendu na number, a potem na Date
+  const raw = (user as any).joiningDate;
+  const ms = parseInt(raw, 10);
+  const joinedDate = !isNaN(ms) ? new Date(ms) : null;
+  const formatted = joinedDate
+    ? format(joinedDate, "dd.MM.yyyy", { locale: pl })
+    : "–";
 
   const stars = Array.from({ length: 5 }, (_, i) => (
     <span
@@ -47,8 +51,6 @@ const SellerCard: React.FC<Props> = ({ userId }) => {
           className="w-16 h-16 rounded-full object-cover flex-shrink-0"
         />
 
-        {/* 1. flex-1 + min-w-0 so child can shrink
-            2. break-all on the <p> to break long words */}
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-lg flex items-center gap-2 break-all">
             {user.firstName}
@@ -66,9 +68,7 @@ const SellerCard: React.FC<Props> = ({ userId }) => {
               {rating.toFixed(2)} ({reviews})
             </span>
           </div>
-          <p className="text-sm text-gray-500 mt-1">
-            Dołączył(a): {joinedDate}
-          </p>
+          <p className="text-sm text-gray-500 mt-1">Dołączył(a): {formatted}</p>
         </div>
       </div>
 
@@ -102,7 +102,9 @@ const SellerCard: React.FC<Props> = ({ userId }) => {
         </button>
 
         {showPhone && (
-          <p className="mt-2 text-center text-gray-700 font-medium">{phone}</p>
+          <p className="mt-2 text-center text-gray-700 font-medium">
+            +48 {(user as any).phoneNumber || "–"}
+          </p>
         )}
       </div>
     </div>

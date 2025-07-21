@@ -8,7 +8,7 @@ import ProductActions from "../component/ProductPage/ProductActions";
 import ProductSpecs from "../component/ProductPage/ProductSpecs";
 import ImagePreview from "../component/ProductPage/ImagePreview";
 import SellerCard from "../component/ProductPage/SellerCard";
-
+import LocationMap from "../component/ProductPage/LocationMap";
 import { formatPrice } from "../utils/formatPrice";
 
 const ProductPage: React.FC = () => {
@@ -47,14 +47,15 @@ const ProductPage: React.FC = () => {
             <p className="text-sm text-gray-700">{product.description}</p>
           </div>
 
-          {/* specs (mobile) */}
+          {/* specs + map + seller (mobile) */}
           <div className="block lg:hidden space-y-6 mt-6">
             <ProductSpecs spec={product.specification || {}} />
 
-            {/* map under specs */}
+            {/* mapa miasta */}
 
-            {/* seller (mobile) */}
+            {/* seller */}
             {product.userId && <SellerCard userId={product.userId} />}
+            {product.location && <LocationMap city={product.location} />}
           </div>
         </div>
 
@@ -72,10 +73,11 @@ const ProductPage: React.FC = () => {
           {/* specs */}
           <ProductSpecs spec={product.specification || {}} />
 
-          {/* map */}
+          {/* mapa miasta */}
 
           {/* seller */}
           {product.userId && <SellerCard userId={product.userId} />}
+          {product.location && <LocationMap city={product.location} />}
         </div>
       </div>
 
