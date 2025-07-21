@@ -6,6 +6,8 @@ interface User {
   firstName: string;
   lastName: string;
   email: string;
+  phoneNumber: number;
+  joiningDate: string;
 }
 
 interface AuthState {
