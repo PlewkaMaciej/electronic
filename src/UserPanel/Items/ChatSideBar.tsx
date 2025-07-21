@@ -1,9 +1,13 @@
 import React, { useState } from "react";
 
-interface ChatPreview {
-  id: string;  
+export interface ChatPreview {
+  id: string;
   name: string;
+  userLastName?: string;
   lastMessage: string;
+  announcementTitle?: string;
+  announcementImage?: string;
+  partnerId?: string;
 }
 
 

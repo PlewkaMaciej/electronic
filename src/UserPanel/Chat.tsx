@@ -5,29 +5,36 @@ import ChatSidebar from "./Items/ChatSideBar";
 import { useUserConversations } from "../../hooks/useUserConversations";
 import { useConversationMessages } from "../../hooks/useConversationMessages";
 import ChatHeader from "../../component/ChatComponent/ChatHeader";
-import ChatMessages from "../../component/ChatComponent/CharMessages";
+import ChatMessages from "../../component/ChatComponent/ChatMessages";
 import ChatInput from "../../component/ChatComponent/ChatInput";
 
-interface ChatPreview {
+export interface ChatPreview {
   id: string;
   name: string;
+  userLastName?: string;
   lastMessage: string;
   announcementTitle?: string;
   announcementImage?: string;
-  userLastName?: string;
+  partnerId?: string;
 }
 
 interface Message {
   _id: string;
-  senderId: string;
+  senderId: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+  };
   text: string;
   createdAt: string;
 }
 
 const Chat: React.FC = () => {
   const { data: chats, isLoading } = useUserConversations();
-  const userId = localStorage.getItem("userId") || "";
+
+  // Pobierz token i userId z localStorage zamiast z Reduxa
   const token = localStorage.getItem("accessToken") || "";
+  const currentUserId = localStorage.getItem("userId") || "";
 
   const [selectedChat, setSelectedChat] = useState<ChatPreview | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -60,7 +67,8 @@ const Chat: React.FC = () => {
 
       const previews = await Promise.all(
         chats.map(async (conv: any) => {
-          const partnerId = conv.members.find((id: string) => id !== userId);
+          // znajdź ID partnera - drugi użytkownik w konwersacji
+          const partnerId = conv.members.find((id: string) => id !== currentUserId);
           const productId = conv.productId;
 
           try {
@@ -89,6 +97,7 @@ const Chat: React.FC = () => {
 
             return {
               id: conv._id,
+              partnerId,
               name: fullName,
               userLastName: lastName,
               lastMessage: conv.lastMessage || "Brak wiadomości",
@@ -99,6 +108,7 @@ const Chat: React.FC = () => {
             console.error("Błąd przy pobieraniu danych rozmowy:", error);
             return {
               id: conv._id,
+              partnerId: "",
               name: "Nieznany użytkownik",
               lastMessage: conv.lastMessage || "Brak wiadomości",
             };
@@ -110,7 +120,7 @@ const Chat: React.FC = () => {
     };
 
     fetchChatUsers();
-  }, [chats, userId, token]);
+  }, [chats, currentUserId, token]);
 
   const handleSelectChat = (chat: ChatPreview) => {
     setSelectedChat(chat);
@@ -154,7 +164,6 @@ const Chat: React.FC = () => {
         <UserPanelNav />
       </div>
 
-      {/* Sidebar z czatami */}
       {(!isMobile || !selectedChat) && (
         <div className="w-full mt-6 max-w-[250px] overflow-y-auto">
           {isLoading ? (
@@ -175,19 +184,16 @@ const Chat: React.FC = () => {
             userLastName={selectedChat.userLastName}
             productTitle={selectedChat.announcementTitle}
             productImage={selectedChat.announcementImage}
+            partnerId={selectedChat.partnerId}
           />
 
           {loadingMessages ? (
             <p className="text-gray-400">Ładowanie wiadomości...</p>
           ) : (
-            <ChatMessages messages={messages} />
+            <ChatMessages messages={messages} currentUserId={currentUserId} />
           )}
 
-          <ChatInput
-            newMessage={newMessage}
-            onChange={setNewMessage}
-            onSend={sendMessage}
-          />
+          <ChatInput newMessage={newMessage} onChange={setNewMessage} onSend={sendMessage} />
         </div>
       )}
     </div>
