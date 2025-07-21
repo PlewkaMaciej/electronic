@@ -2,7 +2,7 @@ import React from "react";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import StyleInput from "../component/Items/StyleInput";
-import { Mail, Lock, User } from "lucide-react";
+import { Mail, Lock, User, Phone } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useMutation } from "react-query";
@@ -21,6 +21,9 @@ const RegisterSchema = Yup.object().shape({
     .oneOf([Yup.ref("password"), ""], "Hasła muszą się zgadzać")
     .required("Potwierdź hasło"),
   agreement: Yup.boolean().oneOf([true], "Musisz zaakceptować zgodę"),
+  phoneNumber: Yup.string()
+    .required("Numer telefonu jest wymagany")
+    .matches(/^\d{9}$/, "Numer telefonu musi składać się z 9 cyfr"),
 });
 
 const registerUser = async (userData: {
@@ -28,6 +31,7 @@ const registerUser = async (userData: {
   lastName: string;
   email: string;
   password: string;
+  phoneNumber: number;
 }) => {
   const response = await axios.post("/auth/register", userData);
   return response.data;
@@ -62,6 +66,7 @@ const RegisterPage: React.FC = () => {
       lastName: values.lastName,
       email: values.email,
       password: values.password,
+      phoneNumber: values.phoneNumber,
     });
   };
 
@@ -79,6 +84,7 @@ const RegisterPage: React.FC = () => {
           password: "",
           confirmPassword: "",
           agreement: false,
+          phoneNumber: "",
         }}
         validationSchema={RegisterSchema}
         onSubmit={handleSubmit}
@@ -119,6 +125,20 @@ const RegisterPage: React.FC = () => {
               icon={<Mail />}
               error={touched.email && errors.email ? errors.email : ""}
               success={touched.email && !errors.email}
+              className="bg-white"
+            />
+            <Field
+              name="phoneNumber"
+              as={StyleInput}
+              label="Numer telefonu"
+              type="number"
+              icon={<Phone />}
+              error={
+                touched.phoneNumber && errors.phoneNumber
+                  ? errors.phoneNumber
+                  : ""
+              }
+              success={touched.phoneNumber && !errors.phoneNumber}
               className="bg-white"
             />
 
