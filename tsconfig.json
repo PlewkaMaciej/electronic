@@ -9,5 +9,5 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true
   },
-  "include": ["src", "component/ProductPage"]
+  "include": ["src", "component/ProductPage", "component/ChatComponent/ChatSideBar.tsx"]
 }

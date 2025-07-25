@@ -22,8 +22,6 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, currentUserId }) 
       {messages.length > 0 ? (
         messages.map((msg) => {
           const isOwn = msg.senderId._id.toString() === currentUserId.toString();
-          
-          console.log(currentUserId)
           return (
             <div
               key={msg._id}

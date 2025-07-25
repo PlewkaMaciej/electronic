@@ -2,14 +2,13 @@ import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import UserPanelNav from "./Items/UserPanelNav";
-import ChatSidebar from "./Items/ChatSideBar";
+import ChatSidebar from "../../component/ChatComponent/ChatSideBar";
 import { useUserConversations } from "../../hooks/useUserConversations";
 import { useConversationMessages } from "../../hooks/useConversationMessages";
 import ChatHeader from "../../component/ChatComponent/ChatHeader";
 import ChatMessages from "../../component/ChatComponent/ChatMessages";
 import ChatInput from "../../component/ChatComponent/ChatInput";
 import { RootState } from "../store";
-
 
 export interface ChatPreview {
   id: string;
@@ -33,7 +32,7 @@ interface Message {
 }
 
 const Chat: React.FC = () => {
-  const { user } = useSelector((state: RootState) => state.auth); // <- pobieramy usera z authSlice
+  const { user } = useSelector((state: RootState) => state.auth);
   const currentUserId = user?._id || "";
 
   const { data: chats, isLoading } = useUserConversations();
@@ -44,12 +43,12 @@ const Chat: React.FC = () => {
   const [newMessage, setNewMessage] = useState("");
   const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth < 768);
   const [chatPreviews, setChatPreviews] = useState<ChatPreview[]>([]);
-  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
+  const [currentConversationId, setCurrentConversationId] = useState<
+    string | null
+  >(null);
 
-  const {
-    data: fetchedMessages,
-    isLoading: loadingMessages,
-  } = useConversationMessages(currentConversationId || "");
+  const { data: fetchedMessages, isLoading: loadingMessages } =
+    useConversationMessages(currentConversationId || "");
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -66,12 +65,16 @@ const Chat: React.FC = () => {
   useEffect(() => {
     const fetchChatUsers = async () => {
       if (!chats) return;
+
       const previews = await Promise.all(
         chats.map(async (conv: any) => {
-          const partnerId = conv.members.find((id: string) => id !== currentUserId);
+          const partnerId = conv.members.find(
+            (id: string) => id !== currentUserId
+          );
           const productId = conv.productId;
 
           try {
+            // Pobierz dane użytkownika i ogłoszenia
             const [userRes, annRes] = await Promise.all([
               axios.get(`/users/${partnerId}`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -85,14 +88,32 @@ const Chat: React.FC = () => {
                 : Promise.resolve({ data: { announcement: null } }),
             ]);
 
+            // Pobierz wszystkie wiadomości danej konwersacji
+            const messagesRes = await axios.get(`/chat/messages/${conv._id}`, {
+              headers: { Authorization: `Bearer ${token}` },
+              withCredentials: true,
+            });
+
+            const messages = messagesRes.data.messages || [];
+            // Znajdź ostatnią wiadomość po createdAt
+            const lastMsg: Message | null =
+              messages.length > 0
+                ? messages.reduce((latest: Message, msg: Message) =>
+                    new Date(msg.createdAt) > new Date(latest.createdAt)
+                      ? msg
+                      : latest
+                  )
+                : null;
+
             const user = userRes.data.user;
             const announcement = annRes.data.announcement;
+
             return {
               id: conv._id,
               partnerId,
               name: user.firstName,
               userLastName: user.lastName,
-              lastMessage: conv.lastMessage || "Brak wiadomości",
+              lastMessage: lastMsg ? lastMsg.text : "Brak wiadomości",
               announcementTitle: announcement?.title || "",
               announcementImage:
                 announcement?.images && announcement.images.length > 0
@@ -105,11 +126,12 @@ const Chat: React.FC = () => {
               id: conv._id,
               partnerId: "",
               name: "Nieznany użytkownik",
-              lastMessage: conv.lastMessage || "Brak wiadomości",
+              lastMessage: "Brak wiadomości",
             };
           }
         })
       );
+
       setChatPreviews(previews);
     };
 
@@ -194,7 +216,11 @@ const Chat: React.FC = () => {
             <ChatMessages messages={messages} currentUserId={currentUserId} />
           )}
 
-          <ChatInput newMessage={newMessage} onChange={setNewMessage} onSend={sendMessage} />
+          <ChatInput
+            newMessage={newMessage}
+            onChange={setNewMessage}
+            onSend={sendMessage}
+          />
         </div>
       )}
     </div>
