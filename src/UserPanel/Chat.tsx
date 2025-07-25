@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import axios from "axios";
 import UserPanelNav from "./Items/UserPanelNav";
 import ChatSidebar from "./Items/ChatSideBar";
@@ -7,6 +8,8 @@ import { useConversationMessages } from "../../hooks/useConversationMessages";
 import ChatHeader from "../../component/ChatComponent/ChatHeader";
 import ChatMessages from "../../component/ChatComponent/ChatMessages";
 import ChatInput from "../../component/ChatComponent/ChatInput";
+import { RootState } from "../store";
+
 
 export interface ChatPreview {
   id: string;
@@ -30,11 +33,11 @@ interface Message {
 }
 
 const Chat: React.FC = () => {
-  const { data: chats, isLoading } = useUserConversations();
+  const { user } = useSelector((state: RootState) => state.auth); // <- pobieramy usera z authSlice
+  const currentUserId = user?._id || "";
 
-  // Pobierz token i userId z localStorage zamiast z Reduxa
+  const { data: chats, isLoading } = useUserConversations();
   const token = localStorage.getItem("accessToken") || "";
-  const currentUserId = localStorage.getItem("userId") || "";
 
   const [selectedChat, setSelectedChat] = useState<ChatPreview | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -45,7 +48,6 @@ const Chat: React.FC = () => {
 
   const {
     data: fetchedMessages,
-    refetch,
     isLoading: loadingMessages,
   } = useConversationMessages(currentConversationId || "");
 
@@ -64,10 +66,8 @@ const Chat: React.FC = () => {
   useEffect(() => {
     const fetchChatUsers = async () => {
       if (!chats) return;
-
       const previews = await Promise.all(
         chats.map(async (conv: any) => {
-          // znajdź ID partnera - drugi użytkownik w konwersacji
           const partnerId = conv.members.find((id: string) => id !== currentUserId);
           const productId = conv.productId;
 
@@ -87,22 +87,17 @@ const Chat: React.FC = () => {
 
             const user = userRes.data.user;
             const announcement = annRes.data.announcement;
-            const fullName = `${user.firstName}`;
-            const lastName = user.lastName;
-            const announcementTitle = announcement?.title || "";
-            const announcementImage =
-              announcement?.images && announcement.images.length > 0
-                ? announcement.images[0]
-                : "";
-
             return {
               id: conv._id,
               partnerId,
-              name: fullName,
-              userLastName: lastName,
+              name: user.firstName,
+              userLastName: user.lastName,
               lastMessage: conv.lastMessage || "Brak wiadomości",
-              announcementTitle,
-              announcementImage,
+              announcementTitle: announcement?.title || "",
+              announcementImage:
+                announcement?.images && announcement.images.length > 0
+                  ? announcement.images[0]
+                  : "",
             };
           } catch (error) {
             console.error("Błąd przy pobieraniu danych rozmowy:", error);
@@ -115,7 +110,6 @@ const Chat: React.FC = () => {
           }
         })
       );
-
       setChatPreviews(previews);
     };
 
@@ -136,22 +130,31 @@ const Chat: React.FC = () => {
   const sendMessage = async () => {
     if (!newMessage.trim() || !currentConversationId) return;
 
+    const tempMessage: Message = {
+      _id: `temp-${Date.now()}`,
+      senderId: {
+        _id: currentUserId,
+        firstName: user?.firstName || "Ty",
+        lastName: user?.lastName || "",
+      },
+      text: newMessage,
+      createdAt: new Date().toISOString(),
+    };
+
+    setMessages((prev) => [...prev, tempMessage]);
+    setNewMessage("");
+
     try {
       const response = await axios.post(
         "/chat/send-message",
-        {
-          conversationId: currentConversationId,
-          text: newMessage,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          withCredentials: true,
-        }
+        { conversationId: currentConversationId, text: newMessage },
+        { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
       );
 
       const sentMessage = response.data.newMessage;
-      setMessages((prev) => [...prev, sentMessage]);
-      setNewMessage("");
+      setMessages((prev) =>
+        prev.map((msg) => (msg._id === tempMessage._id ? sentMessage : msg))
+      );
     } catch (error) {
       console.error("Błąd przy wysyłaniu wiadomości:", error);
     }
@@ -159,7 +162,6 @@ const Chat: React.FC = () => {
 
   return (
     <div className="flex flex-col lg:flex-row max-w-7xl mx-auto px-4 gap-6 items-start">
-      {/* Panel sterowania */}
       <div className="w-full lg:w-1/4">
         <UserPanelNav />
       </div>
@@ -174,7 +176,6 @@ const Chat: React.FC = () => {
         </div>
       )}
 
-      {/* Okno rozmowy */}
       {selectedChat && (
         <div className="w-full mt-6 md:w-3/4 max-w-[600px] border border-gray-300 rounded-2xl shadow-md p-4 bg-white h-[70vh] flex flex-col">
           <ChatHeader

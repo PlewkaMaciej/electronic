@@ -1,5 +1,5 @@
-import { useSelector } from "react-redux";
-import { RootState } from "../../src/store";
+import React from "react";
+
 interface Message {
   _id: string;
   senderId: {
@@ -13,29 +13,27 @@ interface Message {
 
 interface ChatMessagesProps {
   messages: Message[];
-    currentUserId: string;  // dodaj to!
-
+  currentUserId: string;
 }
 
-const ChatMessages: React.FC<ChatMessagesProps> = ({ messages }) => {
-  const userId = useSelector((state: RootState) => state.auth.user?._id);
-
+const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, currentUserId }) => {
   return (
     <div className="flex-1 overflow-y-auto space-y-2 mb-4 pr-2">
       {messages.length > 0 ? (
         messages.map((msg) => {
-          const isOwnMessage = msg.senderId._id === userId;
-
+          const isOwn = msg.senderId._id.toString() === currentUserId.toString();
+          
+          console.log(currentUserId)
           return (
             <div
               key={msg._id}
-              className={`flex ${isOwnMessage ? "justify-end" : "justify-start"}`}
+              className={`flex ${isOwn ? "justify-start" : "justify-end"}`}
             >
               <div
                 className={`max-w-[70%] p-2 rounded-xl text-sm ${
-                  isOwnMessage
-                    ? "bg-blue-500 text-white rounded-br-none"
-                    : "bg-gray-200 text-black rounded-bl-none"
+                  isOwn
+                    ? "bg-blue-500 text-white rounded-bl-none"
+                    : "bg-gray-200 text-black rounded-br-none"
                 }`}
               >
                 {msg.text}
