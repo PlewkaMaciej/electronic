@@ -12,7 +12,7 @@ const MyAds: React.FC = () => {
     (state: RootState) => state.auth
   );
 
-  // przy starcie jeśli brak usera, fetch
+  // jeśli nie ma usera, pobierz go
   useEffect(() => {
     if (!user && !userLoading) {
       dispatch(fetchCurrentUser());
@@ -27,33 +27,39 @@ const MyAds: React.FC = () => {
     error: adsErrorObj,
   } = useUserAnnouncements(userId);
 
-  // skeleton podczas ładowania usera
+  // skeleton user
   if (userLoading || !userId) {
     return (
       <div className="flex max-w-7xl mx-auto px-4 gap-6">
-        <UserPanelNav />
-        <div className="flex-1 text-gray-600">
-          Ładowanie danych użytkownika…
+        <div className="w-1/4">
+          <UserPanelNav />
         </div>
+        <div className="flex-1 text-gray-600">Ładowanie profilu…</div>
       </div>
     );
   }
 
+  // skeleton ads
   if (adsLoading) {
     return (
       <div className="flex max-w-7xl mx-auto px-4 gap-6">
-        <UserPanelNav />
+        <div className="w-1/4">
+          <UserPanelNav />
+        </div>
         <div className="flex-1 text-gray-600">Ładowanie ogłoszeń…</div>
       </div>
     );
   }
 
+  // error
   if (adsError) {
     return (
       <div className="flex max-w-7xl mx-auto px-4 gap-6">
-        <UserPanelNav />
+        <div className="w-1/4">
+          <UserPanelNav />
+        </div>
         <div className="flex-1 text-red-500">
-          Błąd podczas pobierania ogłoszeń:{" "}
+          Błąd podczas pobierania:{" "}
           {adsErrorObj instanceof Error ? adsErrorObj.message : "Nieznany błąd"}
         </div>
       </div>
@@ -65,14 +71,14 @@ const MyAds: React.FC = () => {
       <div className="w-full lg:w-1/4 mb-6 lg:mb-0">
         <UserPanelNav />
       </div>
-      <div className="w-full lg:w-3/4 flex flex-wrap gap-6">
+      <div className="w-full lg:w-3/4 flex flex-wrap gap-6 mt-5">
         {ads.length > 0 ? (
           ads.map((ad) => (
             <Announcement key={ad._id} offer={ad} category={ad.category} />
           ))
         ) : (
           <div className="w-full text-center text-gray-500 py-16">
-            Brak ogłoszeń do wyświetlenia.
+            Nie masz jeszcze żadnych ogłoszeń.
           </div>
         )}
       </div>

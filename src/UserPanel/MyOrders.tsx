@@ -5,36 +5,42 @@ import Announcement from "../../component/Items/Announcement";
 const MyOrders = () => {
   const ads = [
     {
+      id: "1",
       imageSrc: "/images/car1.jpg",
       name: "Samochód sportowy",
       dateAdded: "2025-05-17",
-      specification: "Silnik 2.0 turbo, 300KM, manual",
-      price: "75000",
+      spec: { silnik: "2.0 turbo", moc: "300KM" },
+      price: 75000,
     },
     {
+      id: "2",
       imageSrc: "/images/laptop.jpg",
       name: "Laptop gamingowy",
       dateAdded: "2025-05-15",
-      specification: "16GB RAM, RTX 3060, 1TB SSD",
-      price: "6500",
+      spec: { RAM: "16GB", GPU: "RTX 3060" },
+      price: 6500,
     },
   ];
 
   return (
     <div className="flex flex-col lg:flex-row max-w-7xl mx-auto px-4 gap-6">
-      {/* Nawigacja po lewej */}
       <div className="w-full lg:w-1/4">
         <UserPanelNav />
       </div>
-
-      {/* Zamówienia po prawej */}
-      <div className="w-full lg:w-3/4 space-y-6 p-4 flex gap-3">
-        {ads.map((ad, idx) => (
+      <div className="w-full lg:w-3/4 space-y-6 p-4 flex flex-wrap gap-3">
+        {ads.map((ad) => (
           <Announcement
-            key={idx}
-            imageSrc={ad.imageSrc}
-            name={ad.name}
-            specification={ad.specification}
+            key={ad.id}
+            offer={{
+              _id: ad.id,
+              title: ad.name,
+              images: [ad.imageSrc],
+              createdAt: ad.dateAdded,
+              specification: ad.spec,
+              price: ad.price,
+              userId: ad.id,
+            }}
+            category={null}
           />
         ))}
       </div>
