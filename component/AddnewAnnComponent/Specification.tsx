@@ -5,7 +5,7 @@ import { getLabel } from "../../utils/fieldLabels";
 
 interface FieldDefinition {
   key: string;
-  label: string; // już nie używamy bezpośrednio
+  label: string;
   type: "text" | "select" | "number" | "boolean";
   options?: string[];
   dependsOn?: string;

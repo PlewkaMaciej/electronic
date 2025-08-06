@@ -17,7 +17,7 @@ import Chat from "./UserPanel/Chat";
 import Favorites from "./UserPanel/Favorites";
 import AddNewAnn from "./AddnewAnn";
 import UpdateAccount from "./UserPanel/UpdateAccount";
-
+import EditAnn from "./EditAnnouncementForm";
 import ProtectedRoute from "../component/protectRouter";
 import PublicRoute from "../component/PublicRoute";
 
@@ -66,7 +66,7 @@ export default function App() {
           }
         />
         <Route path="update-account" element={<UpdateAccount />} />
-
+        <Route path="/edit-announcement/:id" element={<EditAnn />} />
         <Route
           path="profile"
           element={

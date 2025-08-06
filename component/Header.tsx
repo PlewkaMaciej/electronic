@@ -87,7 +87,7 @@ const Header: React.FC = () => {
         <MobileSearch />
         <button
           onClick={toggleMobile}
-          className="p-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
+          className="p-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition cursor-pointer"
         >
           {mobileOpen ? (
             <X className="w-6 h-6" />
@@ -109,7 +109,7 @@ const Header: React.FC = () => {
             {isLogged ? (
               <button
                 onClick={toggleAccount}
-                className="px-6 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition"
+                className="px-6 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition cursor-pointer"
               >
                 Twoje konto
               </button>
@@ -133,7 +133,7 @@ const Header: React.FC = () => {
           {isLogged && (
             <button
               onClick={() => navigate("/addNewAnn")}
-              className="px-6 py-2  text-white rounded-lg hover:bg-[#00597A] bg-[#006F91] transition"
+              className="px-6 py-2  text-white rounded-lg hover:bg-[#00597A] bg-[#006F91] transition cursor-pointer"
             >
               Sprzedaj
             </button>
@@ -168,14 +168,14 @@ const Header: React.FC = () => {
             {isLogged ? (
               <button
                 onClick={toggleAccount}
-                className="w-full px-6 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition"
+                className="w-full px-6 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition cursor-pointer"
               >
                 Twoje konto
               </button>
             ) : (
               <Link
                 to="/login"
-                className="w-full block text-center px-6 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition"
+                className="w-full block text-center px-6 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition cursor-pointer"
               >
                 Zaloguj się / Zarejestruj się
               </Link>

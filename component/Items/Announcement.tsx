@@ -7,8 +7,8 @@ import api from "../../src/api/axios";
 import { toast } from "react-toastify";
 import type { RootState } from "../../src/store";
 import DeleteModal from "./DeleteModal";
-import { TrashIcon } from "@heroicons/react/24/outline"; // npm i @heroicons/react
 import { AxiosResponse } from "axios";
+
 const formatDate = (date: string) => {
   const d = new Date(date);
   const day = ("0" + d.getDate()).slice(-2);
@@ -55,12 +55,10 @@ const Announcement: React.FC<AnnouncementProps> = ({
     },
   });
 
-  const handleDelete = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setModalOpen(true);
+  const handleRedirect = () => {
+    if (!modalOpen) navigate(`/Product/${offer._id}`);
   };
 
-  const handleRedirect = () => navigate(`/Product/${offer._id}`);
   const handleLike = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     onLike?.(offer._id);
@@ -72,18 +70,6 @@ const Announcement: React.FC<AnnouncementProps> = ({
                  w-full sm:w-[45%] md:w-[70%] lg:w-[50%] xl:w-[34%] cursor-pointer"
       onClick={handleRedirect}
     >
-      {/* Przycisk usuwania tylko dla właściciela */}
-      {currentUserId === offer.userId && (
-        <button
-          disabled={deleting}
-          onClick={handleDelete}
-          className="absolute top-3 right-3 text-gray-400 hover:text-red-500 cursor-pointer"
-          aria-label="Usuń ogłoszenie"
-        >
-          <TrashIcon className="w-6 h-6" />
-        </button>
-      )}
-
       <div className="w-full aspect-w-4 aspect-h-3 bg-gray-100 rounded-lg overflow-hidden mb-4">
         <img
           src={offer.images[0]}
@@ -121,13 +107,42 @@ const Announcement: React.FC<AnnouncementProps> = ({
         )}
       </div>
 
-      {/* MODAL USUWANIA */}
-      <DeleteModal
-        open={modalOpen}
-        onCancel={() => setModalOpen(false)}
-        onConfirm={() => deleteAnn(offer._id)}
-        loading={deleting}
-      />
+      {currentUserId === offer.userId && (
+        <div className="mt-6 flex flex-col gap-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/edit-announcement/${offer._id}`);
+            }}
+            className="w-full px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
+          >
+            Edytuj ogłoszenie
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setModalOpen(true);
+            }}
+            className="w-full px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+          >
+            Usuń ogłoszenie
+          </button>
+        </div>
+      )}
+
+      {modalOpen && (
+        <div
+          className="fixed inset-0 z-50"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <DeleteModal
+            open={modalOpen}
+            onCancel={() => setModalOpen(false)}
+            onConfirm={() => deleteAnn(offer._id)}
+            loading={deleting}
+          />
+        </div>
+      )}
     </div>
   );
 };
