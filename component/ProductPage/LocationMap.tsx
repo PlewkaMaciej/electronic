@@ -1,4 +1,3 @@
-// src/component/ProductPage/LocationMap.tsx
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   GoogleMap,
@@ -11,28 +10,32 @@ interface Props {
   city: string;
 }
 
-const containerStyle = { width: "100%", height: "300px" };
-// Biblioteki potrzebne do geokodowania i obliczania promienia
+const containerStyle: React.CSSProperties = { width: "100%", height: "300px" };
+
+// UJEDNOLICONA KONFIGURACJA — identyczna jak w LocationPicker
 const LIBRARIES = ["places", "geometry"] as const;
+const GOOGLE_LOADER_OPTIONS = {
+  id: "script-loader",
+  version: "weekly",
+  language: "en",
+  region: "US",
+  googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string,
+  libraries: LIBRARIES as any,
+};
 
 const LocationMap: React.FC<Props> = ({ city }) => {
-  const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-    libraries: LIBRARIES as any,
-  });
+  const { isLoaded, loadError } = useJsApiLoader(GOOGLE_LOADER_OPTIONS);
 
   const geocoderRef = useRef<google.maps.Geocoder>();
   const [center, setCenter] = useState<google.maps.LatLngLiteral | null>(null);
   const [radius, setRadius] = useState<number>(10000);
 
-  // Inicjalizacja Geocodera
   useEffect(() => {
     if (isLoaded && !geocoderRef.current) {
       geocoderRef.current = new window.google.maps.Geocoder();
     }
   }, [isLoaded]);
 
-  // Funkcja geokodująca nazwę miasta
   const geocodeCity = useCallback((cityName: string) => {
     if (!geocoderRef.current) return;
     geocoderRef.current.geocode({ address: cityName }, (results, status) => {
@@ -42,11 +45,11 @@ const LocationMap: React.FC<Props> = ({ city }) => {
       const lat = loc.lat();
       const lng = loc.lng();
 
-      // Obliczenie promienia z viewportu
       let r = 10000;
       if (geom.viewport) {
         const ne = geom.viewport.getNorthEast();
         const centerViewport = geom.viewport.getCenter();
+        // wymaga 'geometry' w libraries (mamy to w obu miejscach)
         r = window.google.maps.geometry.spherical.computeDistanceBetween(
           centerViewport,
           ne
@@ -58,9 +61,8 @@ const LocationMap: React.FC<Props> = ({ city }) => {
     });
   }, []);
 
-  // Geokoduj za każdym razem gdy zmieni się miasto lub API się załaduje
   useEffect(() => {
-    if (isLoaded) {
+    if (isLoaded && city) {
       geocodeCity(city);
     }
   }, [city, isLoaded, geocodeCity]);

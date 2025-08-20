@@ -1,4 +1,3 @@
-// src/locationPicker/LocationPicker.tsx
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   useJsApiLoader,
@@ -9,38 +8,45 @@ import {
 
 export interface LocationPickerProps {
   city: string;
-  onCityChange: (city: string, lat: number, lng: number) => void;
+  // lat/lng opcjonalne -> kompatybilne z (city) podczas dodawania
+  onCityChange: (city: string, lat?: number, lng?: number) => void;
 }
 
-const LIBRARIES = ["places"] as const;
-const AUTOCOMPLETE_OPTIONS = { types: ["(cities)"] };
+// UJEDNOLICONA KONFIGURACJA — identyczna jak w LocationMap
+const LIBRARIES = ["places", "geometry"] as const;
+const GOOGLE_LOADER_OPTIONS = {
+  id: "script-loader",
+  version: "weekly",
+  language: "en",
+  region: "US",
+  googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string,
+  libraries: LIBRARIES as any, // typy z @react-google-maps/api akceptują string[]
+};
 
-// map preview size
-const MAP_PREVIEW_STYLE = { width: "100%", height: "200px" };
+const AUTOCOMPLETE_OPTIONS: google.maps.places.AutocompleteOptions = {
+  types: ["(cities)"],
+};
+
+const MAP_PREVIEW_STYLE: React.CSSProperties = {
+  width: "100%",
+  height: "200px",
+};
 
 const LocationPicker: React.FC<LocationPickerProps> = ({
   city,
   onCityChange,
 }) => {
-  const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-    libraries: LIBRARIES as any, // satisfy TS
-  });
+  const { isLoaded, loadError } = useJsApiLoader(GOOGLE_LOADER_OPTIONS);
 
-  // local input + map center
   const [inputValue, setInputValue] = useState(city);
   const [center, setCenter] = useState<google.maps.LatLngLiteral | null>(null);
 
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
 
-  // keep inputValue in sync if parent `city` changes
   useEffect(() => {
     setInputValue(city);
   }, [city]);
 
-  // once scripts load, we can do nothing extra here
-
-  // store Autocomplete instance
   const onLoadAutocomplete = useCallback(
     (ac: google.maps.places.Autocomplete) => {
       autocompleteRef.current = ac;
@@ -48,17 +54,15 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
     []
   );
 
-  // when a place is chosen
   const onPlaceChanged = useCallback(() => {
     const ac = autocompleteRef.current;
     if (!ac) return;
     const place = ac.getPlace();
-    if (!place.geometry?.location) return;
+    if (!place?.geometry?.location) return;
 
     const lat = place.geometry.location.lat();
     const lng = place.geometry.location.lng();
 
-    // extract city name
     const comps = place.address_components || [];
     const comp =
       comps.find((c) => c.types.includes("locality")) ||

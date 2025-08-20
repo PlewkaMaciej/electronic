@@ -1,76 +1,64 @@
-// src/components/EditAnnouncementForm.tsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useCallback, useRef } from "react";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import api from "../src/api/axios";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-
+import CategoryAnn from "../component/AddnewAnnComponent/Category";
+import { useSingleAnnouncement } from "../hooks/useGetSingleAnn";
 import Description from "../component/AddnewAnnComponent/Description";
-import ImagesUpload from "../component/AddnewAnnComponent/Images";
 import Prize from "../component/AddnewAnnComponent/Prize";
 import Shipment from "../component/AddnewAnnComponent/Shipment";
 import Specification from "../component/AddnewAnnComponent/Specification";
 import Type from "../component/AddnewAnnComponent/Type";
 import LocationPicker from "./locationPicker/locationPicker";
-
+import { useQuery } from "react-query";
 import { useMutation, useQueryClient } from "react-query";
+import ImagesUploadEdit from "../component/EditAnn/ImageUploadEdit";
 
-import { useSelector } from "react-redux";
-
-import { RootState } from "./store";
-
-import { FormValues } from "./AddnewAnn";
-
-function markNestedTouched(obj: any): any {
-  return Object.keys(obj).reduce((acc, key) => {
-    acc[key] =
-      typeof obj[key] === "object" ? markNestedTouched(obj[key]) : true;
-    return acc;
-  }, {} as any);
+interface EditFormValues {
+  category: string;
+  title: string;
+  specification: Record<string, any>;
+  description: string;
+  offerType: string;
+  price: string | number;
+  negotiable: boolean;
+  minPrice: string | number;
+  pickup: boolean;
+  shipping: boolean;
+  images: File[]; // nowe pliki
+  existingImages: string[]; // URL-e istniejących
+  location: string;
 }
 
 const validationSchema = Yup.object({
+  category: Yup.string().required("Kategoria jest wymagana"),
   title: Yup.string()
     .min(5, "Minimum 5 znaków")
     .required("Tytuł jest wymagany"),
   description: Yup.string()
     .min(20, "Minimum 20 znaków")
     .required("Opis jest wymagany"),
-  offerType: Yup.string()
-    .oneOf(["Sprzedaż", "Wynajem", "Zamiana", "Usługa", "Inne"])
-    .required("Wybierz typ ogłoszenia"),
+  offerType: Yup.string().required("Wybierz typ ogłoszenia"),
   price: Yup.number()
     .typeError("Cena musi być liczbą")
-    .positive("Cena musi być > 0")
+    .positive()
     .required("Cena jest wymagana"),
-  negotiable: Yup.boolean(),
-  minPrice: Yup.number()
-    .typeError("Minimalna cena musi być liczbą")
-    .positive("Minimalna cena musi być > 0")
-    .when("negotiable", {
-      is: true,
-      then: (schema) => schema.required("Podaj minimalną cenę"),
-    }),
-  pickup: Yup.boolean(),
-  shipping: Yup.boolean(),
-  images: Yup.array().min(1, "Dodaj co najmniej jedno zdjęcie"),
+  existingImages: Yup.array().min(1, "Musisz mieć przynajmniej jedno zdjęcie"),
   location: Yup.string().when("pickup", {
     is: true,
-    then: (schema) =>
-      schema.required("Wskaż miasto odbioru przy odbiorze osobistym"),
-    otherwise: (schema) => schema.notRequired(),
+    then: (schema) => schema.required("Wskaż miasto przy odbiorze osobistym"),
   }),
   specification: Yup.object().test(
     "all-required",
-    "Wypełnij wszystkie wymagane pola specyfikacji",
+    "Wypełnij specyfikację",
     function (spec) {
-      if (!spec || typeof spec !== "object") {
+      if (!spec || typeof spec !== "object")
         return this.createError({
           path: "specification",
           message: "Wypełnij specyfikację",
         });
-      }
       const empty = Object.entries(spec).find(([, v]) => v === "" || v == null);
       if (empty) {
         return this.createError({
@@ -83,129 +71,204 @@ const validationSchema = Yup.object({
   ),
 });
 
-const EditAnn: React.FC = () => {
+const fetchSpecs = async (category: string) => {
+  const { data } = await api.get<{ fields: any[] }>(
+    `/category-specs/${encodeURIComponent(category)}`
+  );
+  return data.fields;
+};
+
+const EditAnnouncementForm: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const userId = useSelector((s: RootState) => s.auth.user?._id);
+  const qc = useQueryClient();
 
-  const [ann, setAnn] = React.useState<FormValues | null>(null);
-  const [fields, setFields] = React.useState<any[]>([]);
+  const { data: product, isLoading: loadingProduct } = useSingleAnnouncement(
+    id!
+  );
 
-  const { mutate, isLoading: isSubmitting } = useMutation({
-    mutationFn: async (values: FormValues) => {
-      const formData = new FormData();
-      Object.entries(values).forEach(([key, val]) => {
-        if (key === "images") {
-          (val as File[]).forEach((file) => formData.append("images", file));
-        } else {
-          formData.append(
-            key,
-            typeof val === "object" ? JSON.stringify(val) : String(val)
-          );
-        }
-      });
+  const {
+    data: fields,
+    isLoading: fieldsLoading,
+    isError: fieldsError,
+  } = useQuery(
+    ["categorySpecs", product?.category],
+    () => fetchSpecs(product!.category),
+    {
+      enabled: !!product?.category,
+    }
+  );
 
-      const { data } = await api.put(`/announcements/${id}`, formData, {
+  const { mutate: updateAnn, isLoading: updating } = useMutation(
+    async (fd: FormData) => {
+      const { data } = await api.put(`/announcements/${id}`, fd, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       return data;
     },
-    onSuccess: () => {
-      toast.success("Ogłoszenie zaktualizowane!");
-      if (userId) queryClient.invalidateQueries(["userAnnouncements", userId]);
-      navigate("/my-ads");
-    },
-    onError: () => {
-      toast.error("Błąd podczas edycji ogłoszenia.");
-    },
-  });
+    {
+      onSuccess: () => {
+        toast.success("Ogłoszenie zaktualizowane");
+        qc.invalidateQueries(["singleAnnouncement", id]);
+        qc.invalidateQueries(["userAnnouncements"]);
+        navigate(`/Product/${id}`);
+      },
+      onError: (err: any) => {
+        toast.error(
+          err?.response?.data?.message || "Błąd podczas aktualizacji"
+        );
+      },
+    }
+  );
 
-  React.useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const { data } = await api.get(`/announcements/getSingleAnn/${id}`);
-        setAnn({
-          category: data.category,
-          title: data.title,
-          specification: data.specification || {},
-          description: data.description,
-          offerType: data.offerType,
-          price: data.price,
-          negotiable: data.negotiable,
-          minPrice: data.minPrice || "",
-          pickup: data.pickup,
-          shipping: data.shipping,
-          images: [], // nie edytujemy istniejących – zakładamy nowe
-          location: data.location,
-        });
-        setFields(data.fields || []);
-      } catch (err) {
-        toast.error("Nie udało się pobrać ogłoszenia.");
-        navigate("/my-ads");
-      }
+  const initialValues = useMemo<EditFormValues>(() => {
+    if (!product) {
+      return {
+        category: "",
+        title: "",
+        specification: {},
+        description: "",
+        offerType: "",
+        price: "",
+        negotiable: false,
+        minPrice: "",
+        pickup: false,
+        shipping: false,
+        images: [],
+        existingImages: [],
+        location: "",
+      };
+    }
+
+    return {
+      category: product.category || "",
+      title: product.title || "",
+      specification: product.specification || {},
+      description: product.description || "",
+      offerType: product.offerType || "",
+      price: product.price ?? "",
+      negotiable: !!product.negotiable,
+      minPrice: product.minPrice ?? "",
+      pickup: !!product.pickup,
+      shipping: !!product.shipping,
+      images: [],
+      existingImages: product.images ? [...product.images] : [],
+      location:
+        (product.location && (product.location.city ?? product.location)) || "",
     };
-    fetchData();
-  }, [id, navigate]);
+  }, [product]);
 
-  if (!ann) return <p className="text-center mt-10">Ładowanie danych...</p>;
+  const prevCategoryRef = useRef<string | null>(null);
+
+  if (loadingProduct)
+    return <div className="py-8 text-center">Ładowanie ogłoszenia…</div>;
+  if (!product)
+    return (
+      <div className="py-8 text-center text-red-500">
+        Ogłoszenie nie znalezione
+      </div>
+    );
 
   return (
-    <Formik<FormValues>
-      initialValues={ann}
-      validationSchema={validationSchema}
-      enableReinitialize
-      onSubmit={async (values, { setTouched, validateForm }) => {
-        const errors = await validateForm();
-        if (Object.keys(errors).length > 0) {
-          const tf: any = {};
-          Object.keys(errors).forEach((k) => (tf[k] = true));
-          if (errors.specification) {
-            tf.specification = markNestedTouched(errors.specification);
-          }
-          setTouched(tf, false);
-          toast.error("Popraw błędy formularza.");
-          return;
-        }
-        mutate(values);
-      }}
-    >
-      {({ values, setFieldValue, touched, errors }) => (
-        <Form className="mt-5 space-y-6">
-          <Specification fields={fields} />
-          <ImagesUpload />
-          <Description />
-          <Type />
-          <Prize />
-          <Shipment />
+    <div className="container mx-auto py-8 px-4">
+      <h1 className="text-2xl font-bold mb-6">Edytuj ogłoszenie</h1>
 
-          {values.pickup && (
-            <>
-              <LocationPicker
-                city={values.location}
-                onCityChange={(city) => setFieldValue("location", city)}
-              />
-              {touched.location && errors.location && (
-                <p className="text-red-500 text-sm">{errors.location}</p>
+      <Formik<EditFormValues>
+        initialValues={initialValues}
+        enableReinitialize
+        validationSchema={validationSchema}
+        onSubmit={(values) => {
+          const fd = new FormData();
+          fd.append("category", values.category);
+          fd.append("title", values.title);
+          fd.append("description", values.description);
+          fd.append("offerType", values.offerType);
+          fd.append("price", String(values.price));
+          fd.append("negotiable", String(values.negotiable));
+          fd.append("minPrice", String(values.minPrice ?? ""));
+          fd.append("pickup", String(values.pickup));
+          fd.append("shipping", String(values.shipping));
+          fd.append("location", values.location); // ⬅️ STRING, nie JSON
+          fd.append("specification", JSON.stringify(values.specification));
+          fd.append(
+            "existingImages",
+            JSON.stringify(values.existingImages || [])
+          );
+          (values.images || []).forEach((f) => fd.append("images", f));
+          updateAnn(fd);
+        }}
+      >
+        {({ values, setFieldValue }) => {
+          const handleExistingChange = useCallback(
+            (arr: string[]) => setFieldValue("existingImages", arr),
+            [setFieldValue]
+          );
+          const handleNewFilesChange = useCallback(
+            (files: File[]) => setFieldValue("images", files),
+            [setFieldValue]
+          );
+
+          useEffect(() => {
+            if (!fields || !values.category) {
+              prevCategoryRef.current = values.category || null;
+              return;
+            }
+            if (prevCategoryRef.current === values.category) return;
+
+            const defaults: Record<string, any> = {};
+            fields.forEach((f: any) => {
+              defaults[f.key] =
+                (values.specification && values.specification[f.key]) ?? "";
+            });
+
+            setFieldValue("specification", defaults);
+            prevCategoryRef.current = values.category;
+          }, [fields, values.category, setFieldValue]);
+
+          return (
+            <Form className="space-y-6">
+              <CategoryAnn />
+              {fieldsLoading && <p>Ładowanie specyfikacji…</p>}
+              {fieldsError && (
+                <p className="text-red-500">Błąd pobierania specyfikacji.</p>
               )}
-            </>
-          )}
+              {fields && <Specification fields={fields} />}
 
-          <div className="text-right max-w-6xl mx-auto">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className={`px-6 py-2 rounded-xl text-white ${
-                isSubmitting ? "bg-gray-400" : "hover:bg-[#00597A] bg-[#006F91]"
-              }`}
-            >
-              {isSubmitting ? "Zapisywanie…" : "Zapisz zmiany"}
-            </button>
-          </div>
-        </Form>
-      )}
-    </Formik>
+              <ImagesUploadEdit
+                existingImages={values.existingImages}
+                onExistingChange={handleExistingChange}
+                onNewFilesChange={handleNewFilesChange}
+              />
+
+              <Description />
+              <Type />
+              <Prize />
+              <Shipment />
+
+              {values.pickup && (
+                <LocationPicker
+                  city={values.location}
+                  onCityChange={(c) => setFieldValue("location", c)}
+                />
+              )}
+
+              <div className="text-right">
+                <button
+                  type="submit"
+                  disabled={updating}
+                  className={`px-6 py-2 rounded-xl text-white ${
+                    updating ? "bg-gray-400" : "bg-[#006F91] hover:bg-[#00597A]"
+                  }`}
+                >
+                  {updating ? "Aktualizowanie…" : "Zapisz zmiany"}
+                </button>
+              </div>
+            </Form>
+          );
+        }}
+      </Formik>
+    </div>
   );
 };
 
-export default EditAnn;
+export default EditAnnouncementForm;

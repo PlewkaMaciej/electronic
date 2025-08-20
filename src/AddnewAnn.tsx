@@ -30,7 +30,7 @@ export interface FormValues {
   pickup: boolean;
   shipping: boolean;
   images: File[];
-  location: string;
+  location: string; // ⬅️ string!
 }
 
 function markNestedTouched(obj: any): any {
@@ -110,16 +110,21 @@ const AddNewAnn: React.FC = () => {
   const { mutate, isLoading: isSubmitting } = useMutation({
     mutationFn: async (values: FormValues) => {
       const formData = new FormData();
-      Object.entries(values).forEach(([key, val]) => {
-        if (key === "images") {
-          (val as File[]).forEach((file) => formData.append("images", file));
-        } else {
-          formData.append(
-            key,
-            typeof val === "object" ? JSON.stringify(val) : String(val)
-          );
-        }
-      });
+
+      formData.append("category", values.category);
+      formData.append("title", values.title);
+      formData.append("description", values.description);
+      formData.append("offerType", values.offerType);
+      formData.append("price", values.price);
+      formData.append("negotiable", String(values.negotiable));
+      formData.append("minPrice", String(values.minPrice ?? ""));
+      formData.append("pickup", String(values.pickup));
+      formData.append("shipping", String(values.shipping));
+      formData.append("location", values.location); // ⬅️ STRING, nie JSON
+      formData.append("specification", JSON.stringify(values.specification));
+
+      (values.images || []).forEach((file) => formData.append("images", file));
+
       const { data } = await api.post("/announcements/create", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
@@ -157,9 +162,8 @@ const AddNewAnn: React.FC = () => {
         if (Object.keys(errors).length > 0) {
           const tf: any = {};
           Object.keys(errors).forEach((k) => (tf[k] = true));
-          if (errors.specification) {
+          if (errors.specification)
             tf.specification = markNestedTouched(errors.specification);
-          }
           setTouched(tf, false);
           toast.error("Popraw błędy formularza.");
           return;
@@ -197,7 +201,6 @@ const AddNewAnn: React.FC = () => {
             <Prize />
             <Shipment />
 
-            {/* tylko gdy odbiór osobisty */}
             {values.pickup && (
               <>
                 <LocationPicker
